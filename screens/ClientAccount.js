@@ -33,12 +33,13 @@ export class ClientDashboard extends PureComponent {
                           
                             <UserImage sourceUrl={sourceImg} />
 
-                            <View style={{flex: 1, marginHorizontal: 10, justifyContent: "flex-start", alignItems: "center"}}>
+                            <View style={{ flex: 1, marginHorizontal: 10, justifyContent: "flex-start", alignItems: "center" }}>
                                 <Title style={[styles.title, {
                                 marginTop:15,
                                 marginBottom: 5,
+                                marginLeft: 10,
                                 flexShrink: 1,
-                                }]}> {lastName} {firstName} </Title>
+                                }]}>{lastName} {firstName} </Title>
                             </View>
                         </View>
                     </View>
@@ -80,17 +81,10 @@ export class ClientDashboard extends PureComponent {
                                 <Text style={styles.menuItemText}>Mes Vidéos</Text>
                             </View>
                         </TouchableRipple>
-                        <TouchableRipple onPress={() => {this.props.navigation.navigate("Exercices")}}>
+                        <TouchableRipple onPress={() => {this.props.navigation.navigate("Preview")}}>
                             <View style={styles.menuItem}>
                                 <Icon name="share-outline" color="#FF6347" size={25}/>
                                 <Text style={styles.menuItemText}>Envoyer</Text>
-                            </View>
-                        </TouchableRipple>
-                        
-                        <TouchableRipple onPress={() => {}}>
-                            <View style={styles.menuItem}>
-                                <Icon name="account-settings-outline" color="#FF6347" size={25}/>
-                                <Text style={styles.menuItemText}>Les paramètres</Text>
                             </View>
                         </TouchableRipple>
                         
@@ -137,7 +131,7 @@ const styles = StyleSheet.create({
       },
       row: {
         flexDirection: 'row',
-        marginBottom: 10,
+        marginBottom: 20,
       },
       infoBoxWrapper: {
         borderBottomColor: '#dddddd',

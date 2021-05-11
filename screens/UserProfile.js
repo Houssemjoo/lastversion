@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import { connect } from 'react-redux'
 import { Text, View, SafeAreaView, ScrollView, StyleSheet } from 'react-native'
 import {
     Title,
@@ -6,35 +7,29 @@ import {
     Button
 } from 'react-native-paper'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-
-import firebase from 'firebase/app'
-import 'firebase/auth'
-import 'firebase/firestore'
-
+import { RemoveUser } from '../redux/actions'
 import UserImage from '../components/UserImage/UserImage'
 
 export class UserProfile extends PureComponent {
 
     handleDeleteUser = () => {
-        const{ email } = this.props.route.params.user
+        const{ userId } = this.props.route.params.user
 
-        firebase.firestore()
-        .collection("users")
-        .where('email', '==', email)
-        .get()
-        .then((querySnapshot) => {
-            querySnapshot.forEach(documentSnapshot => {
-                
-                firebase.firestore()
-                .collection("users")
-                .doc(documentSnapshot.id)
-                .delete()
-                .then(() => console.log('Deleted'))
-                .catch(err => console.log(err))
+        this.props.RemoveUser({ userId })
+    }
 
-            })
-        })
-        .catch(err => console.log(err))
+    componentDidUpdate(prevProps, prevState){
+        if(prevProps !== this.props){
+            if(prevProps.usesrState !== this.props.usesrState){
+                const{ userId } = this.props.route.params.user
+                const{ users } = this.props.usesrState
+                const indexId = users.map((user) => user.userId).indexOf(userId)
+
+                if(indexId === -1){
+                   this.props.navigation.goBack()
+                }
+            }
+        }
     }
 
     render() {
@@ -50,9 +45,9 @@ export class UserProfile extends PureComponent {
 
                             <View style={{flex: 1, marginHorizontal: 10, justifyContent: "flex-start", alignItems: "center"}}>
                                 <Title style={[styles.title, {
-                                marginTop:15,
-                                marginBottom: 5,
-                                flexShrink: 1,
+                                    marginTop:15,
+                                    marginBottom: 5,
+                                    flexShrink: 1,
                                 }]}> {lastName} {firstName} </Title>
                             </View>
                         </View>
@@ -97,8 +92,11 @@ export class UserProfile extends PureComponent {
     }
 }
 
+const mapStateToProps = (state) => ({
+    usesrState: state.usersState
+})
 
-export default UserProfile
+export default connect(mapStateToProps, { RemoveUser })(UserProfile)
 
 const styles = StyleSheet.create({
     container: {

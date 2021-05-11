@@ -10,10 +10,6 @@ import {
 } from 'react-native';
 import { Button } from 'react-native-paper'
 
-import { Buffer } from "buffer"
-import * as FileSystem from "expo-file-system"
-import * as ImageManipulator from 'expo-image-manipulator';
-
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
@@ -58,17 +54,11 @@ export class EditProfileScreen extends PureComponent {
 
     handleEditProfile = async () => {
       let errorForm = false
-      const{ sourceImg, firstName, lastName, address, num, email } = this.state
+      const{ sourceImg, firstName, lastName, address, num, email, image } = this.state
       const { role } = this.props.userState.currentUser
 
-      //let imgUrl = await this.uploadImage()
-
-      /*
-      if( imgUrl == null && sourceImg && sourceImg.length > 0 ) {
-        imgUrl = sourceImg;
-      }
-      */
-
+      let imgUrl = await this.uploadImage(image) || sourceImg
+      
       if(!firstName && firstName.length === 0){
         errorForm = true
       }
@@ -85,104 +75,52 @@ export class EditProfileScreen extends PureComponent {
         errorForm = true
       }
 
-      if(!sourceImg && sourceImg.length === 0){
-        errorForm = true
-      }
-
       if(!email && email.length === 0){
         errorForm = true
       }
 
-      /*
-      if(!imgUrl && imgUrl.length === 0){
-        errorForm = true
-      }
-      */
-
       if(!errorForm){
         firebase.firestore().collection("users")
-        .doc(firebase.auth().currentUser.uid)
-        .update({
-            firstName,
-            lastName,
-            num,
-            email,
-            address,
-        })
-        .then(() => {
-            this.props.UpdateUser({
+          .doc(firebase.auth().currentUser.uid)
+          .update({
               firstName,
               lastName,
               num,
               email,
               address,
-              sourceImg,
-              role
-            })
-        })
-        .catch(err => console.log(err))
-      }
+              sourceImg: imgUrl
+          })
+          .then(() => {
+              this.props.UpdateUser({
+                firstName,
+                lastName,
+                num,
+                email,
+                address,
+                sourceImg: imgUrl,
+                role
+              })
+          })
+          .catch(err => console.log(err))
+      } alert('Informations modifiées')
     }
 
-  uploadImage = async () => {
-    if( this.state.image == null ) {
-      return null;
-    }
+  uploadImage = async (uri) => {
+    const imageName = 'profileImage' + Date.now();
 
-    const uploadUri = this.state.image;
-    let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
+    const response = await fetch(uri);
+    const blob = await response.blob();
 
-    // Add timestamp to File Name
-    const extension = filename.split('.').pop(); 
-    const name = filename.split('.').slice(0, -1).join('.');
-    filename = name + Date.now() + '.' + extension;
+    const ref = firebase.storage().ref().child(`images/${imageName}`)
 
-    const path = `images/${filename}`
-
-    const result = await ImageManipulator.manipulateAsync(
-      uploadUri,
-      [{ resize: { width: 300 } }],
-       {
-        compress: 0.5,
-        format: ImageManipulator.SaveFormat.JPEG,
-      },
-    )
-    
-    /*
-    const options = { encoding: FileSystem.EncodingType.Base64 }
-
-    console.log(result)
-    
-    const base64Response = await FileSystem.readAsStringAsync(
-        result.uri,
-        options,
-    );
-    
-    const upload = firebase.storage().ref(path).child(filename).putString(base64Response, 'base64url')
-      */
-    
-
-    // Set transferred state
-    upload.on(
-      'state_changed',
-      snapshot => {},
-      err => {
-        return null
-      },
-      async () => {
-        const url = await upload.snapshot.ref.getDownloadURL()
-        if(url){
-          this.setState({image: null})
-        }
-
-        console.log(url)
+    return ref.put(blob).then(() => {
+      return ref.getDownloadURL().then(url => {
         return url
-      }
-    );
+      })
+    })
   }
 
-
-    pickImage = async () => {
+  pickImage = async () => {
       const{ status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
 
       if(status === 'granted'){
@@ -195,19 +133,19 @@ export class EditProfileScreen extends PureComponent {
         })
 
         if (!result.cancelled) {
-          this.setState({ image: result.uri, sourceImg: result.uri })
+          this.setState({ image: result.uri })
         }
       }
-    }
+  }
 
     render(){
       const { colors } = this.props.theme
-      const { firstName, lastName, email, address, num, sourceImg } = this.state
+      const { firstName, lastName, email, address, num, sourceImg, image } = this.state
 
       return(
         <SafeAreaView style={styles.container}>
             <ScrollView>
-              <View style={{alignItems: 'center', marginTop : 50 , marginBottom: 30}}>
+              <View style={{ alignItems: 'center', marginTop : 50 , marginBottom: 30 }}>
                 <TouchableOpacity onPress={this.pickImage}>
                   <View
                     style={{
@@ -217,7 +155,7 @@ export class EditProfileScreen extends PureComponent {
                       justifyContent: 'center',
                       alignItems: 'center',
                   }}>
-                      <EditProfileUserImg sourceImg={sourceImg} />
+                      <EditProfileUserImg sourceImg={image || sourceImg} />
                   </View>
                 </TouchableOpacity>
               <Text style={{ marginTop: 25, fontSize: 16, fontWeight: 'bold' }}>{lastName} {firstName}</Text>
@@ -235,6 +173,11 @@ export class EditProfileScreen extends PureComponent {
                   styles.textInput,
                   {
                     color: colors.text,
+                    borderColor: '#ccc',
+                    borderRadius: 3,
+                    borderWidth: 0.7,
+                    marginLeft:12,
+                    marginBottom:5
                   },
                 ]}
               />
@@ -252,6 +195,11 @@ export class EditProfileScreen extends PureComponent {
                   styles.textInput,
                   {
                     color: colors.text,
+                    borderColor: '#ccc',
+                    borderRadius: 3,
+                    borderWidth: 0.7,
+                    marginLeft:12,
+                    marginBottom:5
                   },
                 ]}
               />
@@ -270,6 +218,11 @@ export class EditProfileScreen extends PureComponent {
                   styles.textInput,
                   {
                     color: colors.text,
+                    borderColor: '#ccc',
+                    borderRadius: 3,
+                    borderWidth: 0.7,
+                    marginLeft:12,
+                    marginBottom:5
                   },
                 ]}
               />
@@ -288,6 +241,11 @@ export class EditProfileScreen extends PureComponent {
                   styles.textInput,
                   {
                     color: colors.text,
+                    borderColor: '#ccc',
+                    borderRadius: 3,
+                    borderWidth: 0.7,
+                    marginLeft:12,
+                    marginBottom:5
                   },
                 ]}
               />
@@ -305,6 +263,10 @@ export class EditProfileScreen extends PureComponent {
                   styles.textInput,
                   {
                     color: colors.text,
+                    borderColor: '#ccc',
+                    borderRadius: 3,
+                    borderWidth: 0.7,
+                    margin:12
                   },
                 ]}
               />

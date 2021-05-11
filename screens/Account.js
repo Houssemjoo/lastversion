@@ -17,7 +17,7 @@ export class Account extends PureComponent {
         firebase.auth()
         .signOut()
     }
-    
+
     render() {
         const { address = "", email = "", firstName = "", lastName = "", num = "", role = "", sourceImg = "" } = this.props.userState.currentUser
 
@@ -29,11 +29,13 @@ export class Account extends PureComponent {
 
                             <UserImage sourceUrl={sourceImg} />
 
-                            <View style={{marginLeft: 20}}>
+                            <View style={{ flex: 1, marginHorizontal: 10, justifyContent: "flex-start", alignItems: "center" ,justifyContent: "center" }}>
                                 <Title style={[styles.title, {
                                 marginTop:15,
                                 marginBottom: 5,
-                                }]}>  { lastName } { firstName } </Title>
+                                marginLeft: 10,
+                                flexShrink: 1,
+                                }]}>{ lastName } { firstName } </Title>
                             </View>
                         </View>
                     </View>
@@ -54,13 +56,6 @@ export class Account extends PureComponent {
                     </View>
       
                     <View tyle={styles.menuWrapper}>
-                        
-                        <TouchableRipple onPress={() => {}}>
-                            <View style={styles.menuItem}>
-                                <Icon name="account-settings-outline" color="#FF6347" size={25}/>
-                                <Text style={styles.menuItemText}>Les paramètres</Text>
-                            </View>
-                        </TouchableRipple>
                         
                         <TouchableRipple  onPress={() => {this.props.navigation.navigate("EditProfile")}}>
                             <View style={styles.menuItem}>
@@ -98,7 +93,8 @@ const styles = StyleSheet.create({
         marginBottom: 25,
       },
       title: {
-        fontSize: 20,
+        fontSize: 22,
+        justifyContent: "center"
       },
       row: {
         flexDirection: 'row',

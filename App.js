@@ -4,7 +4,7 @@ import { View, LogBox, ActivityIndicator } from 'react-native';
 import firebase from 'firebase/app'
 import 'firebase/auth'
 
-// LogBox.ignoreLogs(['Setting a timer'])
+LogBox.ignoreLogs(['Setting a timer'])
 
 const firebaseConfig = {
   apiKey: "AIzaSyB65HnG2F1CtTwPRAGNlCn8ukbMfMeTTWY",

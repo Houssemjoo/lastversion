@@ -1,12 +1,15 @@
-import React, { PureComponent } from 'react'
-import { Text, View } from 'react-native'
+import React, { Component } from 'react'
+import { createStackNavigator } from '@react-navigation/stack'
+import SendVideosScreen from './SendVideos'
 
-export class SendVideo extends PureComponent {
+const Stack = createStackNavigator()
+
+export class SendVideo extends Component {
     render() {
         return (
-            <View>
-               
-            </View>
+            <Stack.Navigator>
+                <Stack.Screen name="Diffusion des Vidéos" component={SendVideosScreen} options={{ headerShown: true }} />
+            </Stack.Navigator>
         )
     }
 }

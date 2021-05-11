@@ -13,7 +13,7 @@ export class Profile extends Component {
   }
   
   componentDidMount() {
-    this.props.fetchUser()
+    this.props.fetchUser() 
   }
   
   render() {

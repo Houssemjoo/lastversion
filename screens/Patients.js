@@ -1,13 +1,13 @@
-import React, { PureComponent } from 'react'
+import React, { Component } from 'react'
 import { View, ActivityIndicator, FlatList, Pressable, Text } from 'react-native'
 
 import { Avatar, List } from 'react-native-paper';
 import { connect } from 'react-redux'
 import { FetchUsers }  from '../redux/actions'
 
-const User = ({ firstName, lastName, sourceImg = "https://icon-library.com/images/user-profile-icon/user-profile-icon-12.jpg", email, navigation, address, num }) => {
+const User = ({ firstName, lastName, sourceImg = "https://icon-library.com/images/user-profile-icon/user-profile-icon-12.jpg", email, navigation, address, num, userId }) => {
     return(
-        <Pressable onPress={() => { navigation.navigate('Single User', { firstName, lastName, sourceImg, email, address, num }) }} android_ripple={{ color: '#CCC' }} style={{borderBottomWidth: 0.5, borderBottomColor: "#CCC" }} >
+        <Pressable onPress={() => { navigation.navigate('Single User', { firstName, lastName, sourceImg, email, address, num, userId }) }} android_ripple={{ color: '#CCC' }} style={{borderBottomWidth: 0.5, borderBottomColor: "#CCC" }} >
             <List.Item
                 titleStyle={{marginTop: 0}}
                 title={`${firstName} ${lastName}`}
@@ -18,26 +18,26 @@ const User = ({ firstName, lastName, sourceImg = "https://icon-library.com/image
     )
 }
 
-export class Patients extends PureComponent {
+export class Patients extends Component {
     componentDidMount(){
         this.props.FetchUsers()
     }
 
-    keyExtractor = (_, index) => index.toString()
-
-    renderItem = ({ item }) => {
-        return <User {...item} navigation={this.props.navigation} />
-    }
-
     render() {
         const{ users } = this.props.usersState
+        
+        const keyExtractor = (_, index) => index.toString()
+
+        const renderItem = ({ item }) => {
+            return <User {...item} navigation={this.props.navigation} />
+        }
 
         return (
-            <View style={{ backgroundColor: "#FFF", elevation: 3, margin: 10, marginTop: 30, borderRadius: 10, }}>
+            <View style={{ backgroundColor: "#FFF", elevation: 3, margin: 10, marginTop: 30, borderRadius: 10 }}>
                 <FlatList 
                     data={users}
-                    renderItem={this.renderItem}
-                    keyExtractor={this.keyExtractor}
+                    renderItem={renderItem}
+                    keyExtractor={keyExtractor}
                 />
             </View>
         )
@@ -49,15 +49,3 @@ const mapStateToProps = (state) => ({
 })
 
 export default connect(mapStateToProps, { FetchUsers })(Patients)
-
-
-    /*
-  
-
-
-
-
-
-
-  
-    */

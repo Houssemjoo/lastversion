@@ -1,15 +1,12 @@
 import React, { Component } from 'react'
-import {
-  StyleSheet, Text, View, ScrollView, TouchableOpacity
-  } from 'react-native'
+import { ImageBackground, ScrollView, TouchableOpacity, StyleSheet, Text, View, SafeAreaView,} from 'react-native'
 import moment from 'moment'
-import { Video } from 'expo-av' 
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
-
+import { Video } from 'expo-av'
+import Icon from 'react-native-vector-icons/Fontisto'
+import bgImg from '../images/bgvideo.jpg'
 
 function Timer({ interval, style }) {
-  const pad = (n) => n < 100? '0' + n : n
+  const pad = (n) => n < 10 ? '0' + n : n
   const duration = moment.duration(interval)
   const centiseconds = Math.floor(duration.milliseconds() / 10)
   return (
@@ -78,7 +75,7 @@ function ButtonsRow({ children }) {
     <View style={styles.buttonsRow}>{children}</View>
   )
 }
-export default class Timerr extends Component {
+export default class Videos extends Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -139,95 +136,100 @@ export default class Timerr extends Component {
     })
     this.timer = setInterval(() => {
       this.setState({ now: new Date().getTime()})
-    }, 5000)
+    }, 100)
   }
   render() {
     const { now, start, laps } = this.state
     const timer = now - start
     return (
-      <View style={styles.container}>
-         <Video
+        <SafeAreaView>
+          <ScrollView>
+            <ImageBackground blurRadius={2} style={styles.backgroundContainer} source={bgImg} >
+              <View style={styles.container}>
+                  <Video
                     source={{ uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' }}
                     rate={1.0}
                     volume={1.0}
                     isMuted={false}
                     useNativeControls
                     resizeMode="cover"
-                    style={{ width: 300, height: 300 }}
-                    /> 
-                     <Icon name="alarm" color="#FF6347" style = {{marginTop : 20}} size={50}/>
-        <Timer
-          interval={laps.reduce((total, curr) => total + curr, 0) + timer}
-          style={styles.timer}
-        />
-
-        {laps.length === 0 && (
-          <ButtonsRow>
-            <RoundButton
-              title='Lap'
-              color='#8B8B90'
-              background='#151515'
-              disabled
-            />
-            <RoundButton
-              title='Start'
-              color='#50D167'
-              background='#1B361F'
-              onPress={this.start}
-            />
-          </ButtonsRow>
-        )}
-        {start > 0 && (
-          <ButtonsRow>
-            <RoundButton
-              title='Lap'
-              color='#FFFFFF'
-              background='#3D3D3D'
-              onPress={this.lap}
-            />
-            <RoundButton
-              title='Stop'
-              color='#E33935'
-              background='#3C1715'
-              onPress={this.stop}
-            />
-          </ButtonsRow>
-        )}
-        {laps.length > 0 && start === 0 && (
-          <ButtonsRow>
-            <RoundButton
-              title='Reset'
-              color='#FFFFFF'
-              background='#3D3D3D'
-              onPress={this.reset}
-            />
-            <RoundButton
-              title='Start'
-              color='#50D167'
-              background='#1B361F'
-              onPress={this.resume}
-            />
-          </ButtonsRow>
-        )}
-        <LapsTable laps={laps} timer={timer}/>
-      </View>
+                    style={{ width: 300, height: 300 , marginBottom: 16}}
+                  /> 
+                  <Icon name="stopwatch" color='green' size={50}/>
+                <Timer
+                  interval={laps.reduce((total, curr) => total + curr, 0) + timer}
+                  style={styles.timer}
+                />
+                {laps.length === 0 && (
+                  <ButtonsRow>
+                    <RoundButton
+                     title='Lap'
+                      color='#8B8B90'
+                      background='#151515'
+                      disabled
+                    />
+                    <RoundButton
+                      title='Start'
+                      color='#50D167'
+                      background='#1B361F'
+                      onPress={this.start}
+                    />
+                  </ButtonsRow>
+                )}
+                {start > 0 && (
+                  <ButtonsRow>
+                    <RoundButton
+                      title='Lap'
+                      color='#FFFFFF'
+                      background='#3D3D3D'
+                      onPress={this.lap}
+                    />
+                    <RoundButton
+                      title='Stop'
+                      color='#E33935'
+                      background='#3C1715'
+                      onPress={this.stop}
+                    />
+                  </ButtonsRow>
+                )}
+                {laps.length > 0 && start === 0 && (
+                  <ButtonsRow>
+                    <RoundButton
+                      title='Reset'
+                      color='#FFFFFF'
+                      background='#3D3D3D'
+                      onPress={this.reset}
+                    />
+                    <RoundButton
+                      title='Start'
+                      color='#50D167'
+                      background='#1B361F'
+                      onPress={this.resume}
+                    />
+                  </ButtonsRow>
+                )}
+                <LapsTable laps={laps} timer={timer}/>
+              </View>
+          
+            </ImageBackground>
+          </ScrollView>
+        </SafeAreaView>
     )
   }
 }
 
 const styles = StyleSheet.create({
   container: {
-   flex :1,
-    backgroundColor: '#2B547E',
+    flex: 1,
     alignItems: 'center',
-    paddingTop: 30,
+    paddingTop: 20,
     paddingHorizontal: 20,
   },
   timer: {
-    color: '#FFFFFF',
-    fontSize: 30,
+    color: '#145A32',
+    fontSize: 76,
     fontWeight: '200',
-    width: 50,
+    width: 110,
   },
   button: {
     width: 80,
@@ -251,11 +253,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignSelf: 'stretch',
     justifyContent: 'space-between',
-    marginTop: 30,
-    marginBottom: 10,
+    marginTop: 80,
+    marginBottom: 30,
   },
   lapText: {
-    color: '#FFFFFF',
+    color: '#145A32',
     fontSize: 18,
   },
   lapTimer: {
@@ -279,5 +281,12 @@ const styles = StyleSheet.create({
   },
   timerContainer: {
     flexDirection: 'row',
-  }
+    marginLeft: 10
+  },
+  backgroundContainer: {
+        flex : 1,
+        alignItems:'center',
+        overlayColor: 'black'
+    }
+
 })

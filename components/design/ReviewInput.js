@@ -1,14 +1,14 @@
 import React from 'react';
-import { View, TextInput, StyleSheet } from 'react-native';
+import { Text, View, TextInput, StyleSheet } from 'react-native';
 import { windowHeight } from '../utils/Dimensions';
  
 import AntDesign from 'react-native-vector-icons/AntDesign';
  
-const FormInput = ({labelValue, placeholderText, iconType, keyboardTypeType, ...rest}) => {
+const ReviewInput = ({labelValue, placeholderText, iconType, keyboardTypeType, ...rest}) => {
   return (
     <View style={styles.inputContainer}>
       <View style={styles.iconStyle}>
-        <AntDesign name={iconType} size={25} color="#666" />
+        <AntDesign name={iconType} size={20} color="#666" />
       </View>
       <TextInput
         value={labelValue}
@@ -17,26 +17,30 @@ const FormInput = ({labelValue, placeholderText, iconType, keyboardTypeType, ...
         placeholder={placeholderText}
         placeholderTextColor="#666"
         keyboardType={keyboardTypeType}
+        backgroundColor='#ffd4b1'
+        borderRadius={20}
         {...rest}
       />
+      <Text>   </Text>
     </View>
   );
 };
  
-export default FormInput;
+export default ReviewInput;
  
 const styles = StyleSheet.create({
   inputContainer: {
-    marginTop: 5,
-    marginBottom: 10,
+    opacity:0.7,
+    marginTop: 10,
+    marginBottom: 25,
     width: '100%',
-    height: windowHeight / 15,
+    height: 40,
     borderColor: '#ccc',
-    borderRadius: 3,
-    borderWidth: 0.7,
+    borderRadius: 20,
+    borderWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#ffd4b1',
   },
   iconStyle: {
     padding: 10,
