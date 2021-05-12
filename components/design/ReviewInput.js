@@ -1,6 +1,5 @@
 import React from 'react';
 import { Text, View, TextInput, StyleSheet } from 'react-native';
-import { windowHeight } from '../utils/Dimensions';
  
 import AntDesign from 'react-native-vector-icons/AntDesign';
  
@@ -21,7 +20,6 @@ const ReviewInput = ({labelValue, placeholderText, iconType, keyboardTypeType, .
         borderRadius={20}
         {...rest}
       />
-      <Text>   </Text>
     </View>
   );
 };

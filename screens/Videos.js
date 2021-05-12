@@ -1,292 +1,139 @@
 import React, { Component } from 'react'
-import { ImageBackground, ScrollView, TouchableOpacity, StyleSheet, Text, View, SafeAreaView,} from 'react-native'
-import moment from 'moment'
-import { Video } from 'expo-av'
-import Icon from 'react-native-vector-icons/Fontisto'
-import bgImg from '../images/bgvideo.jpg'
+import firebase from 'firebase/app'
+import 'firebase/auth'
+import 'firebase/firestore'
+import { connect } from 'react-redux'
 
-function Timer({ interval, style }) {
-  const pad = (n) => n < 10 ? '0' + n : n
-  const duration = moment.duration(interval)
-  const centiseconds = Math.floor(duration.milliseconds() / 10)
-  return (
-    <View style={styles.timerContainer}>
-      <Text style={style}>{pad(duration.minutes())}:</Text>
-      <Text style={style}>{pad(duration.seconds())},</Text>
-      <Text style={style}>{pad(centiseconds)}</Text>
+import { FlatList, Text, View, Pressable } from 'react-native'
+import { Avatar, List } from 'react-native-paper'
+
+const Header = ({ videosTotal }) => {
+  return(
+    <View style={{ flex: 1, flexDirection: "row", elevation: 1, margin: 10, alignItems: "center", justifyContent: "center", paddingVertical: 10, backgroundColor: "#FFF", borderRadius: 5 }}>
+      <Text style={{ fontSize: 20 }}>Nombre de vidéos : </Text>
+      <Text style={{ fontSize: 18 }}>{videosTotal}</Text>
     </View>
   )
 }
 
-function RoundButton({ title, color, background, onPress, disabled }) {
-  return (
-    <TouchableOpacity
-      onPress={() => !disabled && onPress()}
-      style={[ styles.button, { backgroundColor: background }]}
-      activeOpacity={disabled ? 1.0 : 0.7}
-    >
-      <View style={styles.buttonBorder}>
-        <Text style={[ styles.buttonTitle, { color }]}>{title}</Text>
-      </View>
-    </TouchableOpacity>
-  )
-}
-function Lap({ number, interval, fastest, slowest }) {
-  const lapStyle = [
-    styles.lapText,
-    fastest && styles.fastest,
-    slowest && styles.slowest,
-  ]
-  return (
-    <View style={styles.lap}>
-      <Text style={lapStyle}>Lap {number}</Text>
-      <Timer style={[lapStyle, styles.lapTimer]} interval={interval}/>
-    </View>
-  )
-}
+const VideosList = ({ videos, navigation }) => {
 
-function LapsTable({ laps, timer }) {
-  const finishedLaps = laps.slice(1)
-  let min = Number.MAX_SAFE_INTEGER
-  let max = Number.MIN_SAFE_INTEGER
-  if (finishedLaps.length >= 2) {
-    finishedLaps.forEach(lap => {
-      if (lap < min) min = lap
-      if (lap > max) max = lap
-    })
+  const keyExtractor = (_, index) => index.toString()
+
+  const renderItem = ({ item }) => {
+      return <Video {...item} navigation={navigation} />
   }
-  return (
-    <ScrollView style={styles.scrollView}>
-      {laps.map((lap, index) => (
-        <Lap
-          number={laps.length - index}
-          key={laps.length - index}
-          interval={index === 0 ? timer + lap : lap}
-          fastest={lap === min}
-          slowest={lap === max}
-        />
-      ))}
-    </ScrollView>
+
+  return(
+    <View style={{ flex: 1, margin: 10, marginTop: 15, borderRadius: 10, backgroundColor: "#FFF", borderRadius: 5  }}>
+      <FlatList 
+        data={videos}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+      />
+    </View>
   )
 }
 
-function ButtonsRow({ children }) {
-  return (
-    <View style={styles.buttonsRow}>{children}</View>
+const Video = ({ videoId, title, description, url, navigation }) => {
+  return(
+    <Pressable onPress={() => { navigation.navigate('Single Video', { videoId, title, description, url }) }} android_ripple={{ color: '#CCC' }} style={{borderBottomWidth: 0.5, borderBottomColor: "#CCC" }} >
+        <List.Item
+            titleStyle={{ marginTop: 0, fontSize: 18 }}
+            title={title}
+            description={description}
+            descriptionStyle={{ fontSize: 16 }}
+            left={props => <Avatar.Icon {...props} icon='video' size={45} color="#FFA500" style={{backgroundColor: "#F1F1F1", marginTop: 10, marginRight: 10 }}/>}
+        />
+    </Pressable>
   )
 }
-export default class Videos extends Component {
-  constructor(props) {
+
+const FetchVideos = async ({ userId }) => {
+  const data = {
+    videos: [],
+    videosTotal: null
+  }
+
+  try {
+    const querySnapshot =  await firebase.firestore().collection("videos").where('usersId', 'array-contains', `${userId}`).get()
+
+    if(!querySnapshot.exists){
+      data.videosTotal = querySnapshot.size
+
+      querySnapshot.forEach(documentSnapshot => {
+        const videoId = documentSnapshot.id
+        data.videos.push({...documentSnapshot.data(), videoId})
+      })
+
+      return data
+    }
+  } catch(err) {
+    return data
+  }
+}
+
+export class Videos extends Component {
+  constructor(props){
     super(props)
     this.state = {
-      start: 0,
-      now: 0,
-      laps: [ ],
+      videos: [],
+      videosTotal: []
     }
   }
-  componentWillUnmount() {
-    clearInterval(this.timer)
-  }
 
-  start = () => {
-    const now = new Date().getTime()
+  async componentDidMount(){
+    const{ userId } = this.props.userState.currentUser
+
+    const { videos, videosTotal } = await FetchVideos({ userId })
+
     this.setState({
-      start: now,
-      now,
-      laps: [0],
-    })
-    this.timer = setInterval(() => {
-      this.setState({ now: new Date().getTime()})
-    }, 100)
-  }
-  
-  lap = () => {
-    const timestamp = new Date().getTime()
-    const { laps, now, start } = this.state
-    const [firstLap, ...other] = laps
-    this.setState({
-      laps: [0, firstLap + now - start, ...other],
-      start: timestamp,
-      now: timestamp,
+      videos,
+      videosTotal
     })
   }
 
-  stop = () => {
-    clearInterval(this.timer)
-    const { laps, now, start } = this.state
-    const [firstLap, ...other] = laps
-    this.setState({
-      laps: [firstLap + now - start, ...other],
-      start: 0,
-      now: 0,
-    })
-  }
-  reset = () => {
-    this.setState({
-      laps: [],
-      start: 0,
-      now: 0,
-    })
-  }
-  resume = () => {
-    const now = new Date().getTime()
-    this.setState({
-      start: now,
-      now,
-    })
-    this.timer = setInterval(() => {
-      this.setState({ now: new Date().getTime()})
-    }, 100)
-  }
   render() {
-    const { now, start, laps } = this.state
-    const timer = now - start
+    const{ videos, videosTotal } = this.state
+
+    const Data = [
+      {
+        name: "header",
+        videosTotal
+      },
+      {
+        name: "videos list",
+        videos,
+        navigation: this.props.navigation
+      }
+    ]
+
+    const keyExtractor = (_, index) => index.toString()
+
+    const renderItem = ({ item }) => {
+        if(item.name === "header"){
+          return <Header { ...item } />
+        }
+
+        if(item.name === "videos list"){
+          return <VideosList { ...item } />
+        }
+
+        return null
+    }
+    
     return (
-        <SafeAreaView>
-          <ScrollView>
-            <ImageBackground blurRadius={2} style={styles.backgroundContainer} source={bgImg} >
-              <View style={styles.container}>
-                  <Video
-                    source={{ uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' }}
-                    rate={1.0}
-                    volume={1.0}
-                    isMuted={false}
-                    useNativeControls
-                    resizeMode="cover"
-                    style={{ width: 300, height: 300 , marginBottom: 16}}
-                  /> 
-                  <Icon name="stopwatch" color='green' size={50}/>
-                <Timer
-                  interval={laps.reduce((total, curr) => total + curr, 0) + timer}
-                  style={styles.timer}
-                />
-                {laps.length === 0 && (
-                  <ButtonsRow>
-                    <RoundButton
-                     title='Lap'
-                      color='#8B8B90'
-                      background='#151515'
-                      disabled
-                    />
-                    <RoundButton
-                      title='Start'
-                      color='#50D167'
-                      background='#1B361F'
-                      onPress={this.start}
-                    />
-                  </ButtonsRow>
-                )}
-                {start > 0 && (
-                  <ButtonsRow>
-                    <RoundButton
-                      title='Lap'
-                      color='#FFFFFF'
-                      background='#3D3D3D'
-                      onPress={this.lap}
-                    />
-                    <RoundButton
-                      title='Stop'
-                      color='#E33935'
-                      background='#3C1715'
-                      onPress={this.stop}
-                    />
-                  </ButtonsRow>
-                )}
-                {laps.length > 0 && start === 0 && (
-                  <ButtonsRow>
-                    <RoundButton
-                      title='Reset'
-                      color='#FFFFFF'
-                      background='#3D3D3D'
-                      onPress={this.reset}
-                    />
-                    <RoundButton
-                      title='Start'
-                      color='#50D167'
-                      background='#1B361F'
-                      onPress={this.resume}
-                    />
-                  </ButtonsRow>
-                )}
-                <LapsTable laps={laps} timer={timer}/>
-              </View>
-          
-            </ImageBackground>
-          </ScrollView>
-        </SafeAreaView>
+      <FlatList 
+        data={Data}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+      />
     )
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    paddingTop: 20,
-    paddingHorizontal: 20,
-  },
-  timer: {
-    color: '#145A32',
-    fontSize: 76,
-    fontWeight: '200',
-    width: 110,
-  },
-  button: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonTitle: {
-    fontSize: 18,
-  },
-  buttonBorder: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonsRow: {
-    flexDirection: 'row',
-    alignSelf: 'stretch',
-    justifyContent: 'space-between',
-    marginTop: 80,
-    marginBottom: 30,
-  },
-  lapText: {
-    color: '#145A32',
-    fontSize: 18,
-  },
-  lapTimer: {
-    width: 30,
-  },
-  lap: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    borderColor: '#151515',
-    borderTopWidth: 1,
-    paddingVertical: 10,
-  },
-  scrollView: {
-    alignSelf: 'stretch',
-  },
-  fastest: {
-    color: '#4BC05F',
-  },
-  slowest: {
-    color: '#CC3531',
-  },
-  timerContainer: {
-    flexDirection: 'row',
-    marginLeft: 10
-  },
-  backgroundContainer: {
-        flex : 1,
-        alignItems:'center',
-        overlayColor: 'black'
-    }
-
+const mapStateToProps = (state) => ({
+  userState: state.userState,
 })
+
+export default connect(mapStateToProps)(Videos)

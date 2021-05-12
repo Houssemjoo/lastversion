@@ -1,5 +1,5 @@
 import React, {useEffect , useRef} from 'react';
-import { StyleSheet, Animated, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Animated, View, Pressable } from 'react-native';
 import Svg , {G, Circle } from 'react-native-svg';
 import {AntDesign} from '@expo/vector-icons'
 
@@ -55,12 +55,13 @@ function NextButton({percentage,scrollTo}) {
            
            />
            </Svg>
-           <TouchableOpacity 
-           style = {styles.button}
-           onPress = {scrollTo}
+           <Pressable
+            android_ripple={{color: "#FFF", radius: 100}}
+            style = {styles.button}
+            onPress = {scrollTo}
            >
                <AntDesign name = 'arrowright' size = {32} color = '#fff' />
-           </TouchableOpacity>
+           </Pressable>
         </View>
     );
 }

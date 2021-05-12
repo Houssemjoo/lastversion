@@ -24,12 +24,12 @@ export class Account extends PureComponent {
         return (
             <SafeAreaView style={styles.container}>
                 <ScrollView>
-                    <View style = {styles.userInfoSection}>
+                    <View style = {{ flex: 1, paddingHorizontal: 20, marginBottom: 20  }}>
                         <View style={{ flexDirection: 'row', marginTop: 15 }} >
 
                             <UserImage sourceUrl={sourceImg} />
 
-                            <View style={{ flex: 1, marginHorizontal: 10, justifyContent: "flex-start", alignItems: "center" ,justifyContent: "center" }}>
+                            <View style={{ flex: 1, marginHorizontal: 15, justifyContent: "flex-start", alignItems: "flex-start" }}>
                                 <Title style={[styles.title, {
                                 marginTop:15,
                                 marginBottom: 5,
@@ -56,17 +56,24 @@ export class Account extends PureComponent {
                     </View>
       
                     <View tyle={styles.menuWrapper}>
-                        
+
+                        <TouchableRipple onPress={() => {}}>
+                            <View style={styles.menuItem}>
+                                <Icon name="share-outline" color="#FFA500" size={25}/>
+                                <Text style={styles.menuItemText}>Envoyer</Text>
+                            </View>
+                        </TouchableRipple>
+
                         <TouchableRipple  onPress={() => {this.props.navigation.navigate("EditProfile")}}>
                             <View style={styles.menuItem}>
-                                <Icon name="file-document-edit-outline" color="#FF6347" size={25}/>
+                                <Icon name="file-document-edit-outline" color="#FFA500" size={25}/>
                                 <Text style={styles.menuItemText}>Modifier</Text>
                             </View>
                         </TouchableRipple>
 
                         <TouchableRipple  onPress={() => this.logout()}>
                             <View style={styles.menuItem}>
-                                <Icon name="logout-variant" color="#FF6347" size={25}/>
+                                <Icon name="logout-variant" color="#FFA500" size={25}/>
                                 <Text style={styles.menuItemText}>Se Déconnecter </Text>
                             </View>
                         </TouchableRipple>
@@ -90,7 +97,8 @@ const styles = StyleSheet.create({
       },
       userInfoSection: {
         paddingHorizontal: 30,
-        marginBottom: 25,
+        marginBottom: 5,
+        marginTop: 10
       },
       title: {
         fontSize: 22,

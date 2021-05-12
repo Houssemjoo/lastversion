@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, ActivityIndicator, FlatList, Pressable, Text } from 'react-native'
+import { View, FlatList, Pressable } from 'react-native'
 
 import { Avatar, List } from 'react-native-paper';
 import { connect } from 'react-redux'

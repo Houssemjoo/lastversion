@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, Text, View, Image, useWindowDimensions } from 'react-native';
-import slides from '../../slides'
 
 function OnBoardingItem({item}) {
 const {width} = useWindowDimensions()
@@ -29,7 +28,6 @@ const styles = StyleSheet.create({
     image : {
         flex : 0.7,
         justifyContent: 'center',
-
     },
     title : {
         fontWeight : '800',

@@ -5,7 +5,7 @@ import 'firebase/auth'
 import SocialButton from '../../components/design/SocialButton'
 import FormButton from '../../components/design/FormButton'
 import FormInput from '../../components/design/FormInput'
-import loginImg from '../../images/login.gif'
+import loginImg from '../../images/login1.gif'
 
 export class Login extends Component {
     constructor(props) {

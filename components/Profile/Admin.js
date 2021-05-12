@@ -5,7 +5,7 @@ import FontAwesomeIcons from 'react-native-vector-icons/FontAwesome'
 import AdminDashboardScreen from '../../screens/AdminDashboard'
 import SendVideoScreen from '../../screens/SendVideo'
 import UsersScreen from '../../screens/Users'
-import ReviewsScreen from '../../screens/Reviews'
+import RapportsScreen from '../../screens/Rapports'
 
 const Tab = createMaterialBottomTabNavigator()
 
@@ -43,7 +43,7 @@ export class AdminDashboard extends PureComponent {
                         ),
                 }}/>
 
-                <Tab.Screen name="Reviews" component={ReviewsScreen}
+                <Tab.Screen name="Reviews" component={RapportsScreen}
                     options={{
                         tabBarLabel: 'Rapports',
                         tabBarIcon: ({ color, size }) => (

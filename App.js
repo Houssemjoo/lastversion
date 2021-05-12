@@ -4,7 +4,7 @@ import { View, LogBox, ActivityIndicator } from 'react-native';
 import firebase from 'firebase/app'
 import 'firebase/auth'
 
-LogBox.ignoreLogs(['Setting a timer'])
+// LogBox.ignoreLogs(['Setting a timer'])
 
 const firebaseConfig = {
   apiKey: "AIzaSyB65HnG2F1CtTwPRAGNlCn8ukbMfMeTTWY",
@@ -34,8 +34,9 @@ import EditProfile from './screens/EditProfileScreen'
 import VideosScreen from './screens/Videos'
 import PreviewScreen from './screens/Preview'
 import SingleUserScreen from './screens/SingleUser'
+import SingleVideoScreen from './screens/SingleVideo'
 import ExercicesScreen from './screens/Exercices'
-
+import SingleRapportScreen from './screens/SingleRapport'
 
 const Stack = createStackNavigator()
 const Stacklog = createStackNavigator()
@@ -86,10 +87,12 @@ export default function App() {
               <Stacklog.Navigator initialRouteName="Profile">
                 <Stacklog.Screen name="Profile" component={Profile} options={{ headerShown: false }} />
                 <Stacklog.Screen name="EditProfile" component={EditProfile} options={{ headerShown: true , title : 'Modifier Votre Profil'}}/>
-                <Stacklog.Screen name="Videos" component={VideosScreen} options={{ headerShown: true , title : 'Mes Vidéos'}}/>
+                <Stacklog.Screen name="Videos" component={VideosScreen} options={{ headerShown: true , title : 'Mes Vidéos'}} />
+                <Stacklog.Screen name="Single Video" component={SingleVideoScreen} options={{ headerShown: false, title : 'vidéo' }} />
                 <Stacklog.Screen name="Preview" component={PreviewScreen} options={{ headerShown: true , title : 'Envoyer Mon Rapport'}}/>
                 <Stacklog.Screen name="Single User" component={SingleUserScreen} options={{ headerShown: false }}/>
                 <Stacklog.Screen name="Exercices" component={ExercicesScreen} options={{ headerShown: true }}/>
+                <Stacklog.Screen name="SingleRapport" component={SingleRapportScreen} options={{ headerShown: false }}/>
               </Stacklog.Navigator>
               :
               null

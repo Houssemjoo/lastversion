@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, Pressable } from 'react-native'
+import { View, Pressable } from 'react-native'
 import { List, Avatar } from 'react-native-paper'
 import UnCheckIcon from '../unCheckIcon'
 import CheckIcon from '../checkIcon'
@@ -24,14 +24,19 @@ const UsersListIcon = (checked) => {
     }
 }
 
-export default function SelectCheckBox({ firstName, lastName, email, sourceImg = "https://icon-library.com/images/user-profile-icon/user-profile-icon-12.jpg", userId, onPress, reset }) {
+export default function SelectCheckBox({ firstName, lastName, email, sourceImg = "https://icon-library.com/images/user-profile-icon/user-profile-icon-12.jpg", userId, onPress, reset, selectedUsers }) {
     const[checked, setChecked] = useState(false)
 
     useEffect(() => {
-        if(reset){
-            setChecked(false)
+        if(selectedUsers){
+            const userIndex = selectedUsers.indexOf(userId)
+            if(userIndex === -1){
+                setChecked(false)
+            } else {
+                setChecked(true)
+            }
         }
-    }, [reset])
+    }, [selectedUsers, onPress, userId])
 
     const bgcolor = () => {
         if(checked){
@@ -42,8 +47,17 @@ export default function SelectCheckBox({ firstName, lastName, email, sourceImg =
     }
 
     const handlePress = () => {
-        setChecked(!checked)
-        onPress({ userId, checked: !checked})
+        //setChecked(!checked)
+        if(selectedUsers){
+            const userIndex = selectedUsers.indexOf(userId)
+            if(userIndex === -1){
+                setChecked(true)
+                onPress({ userId, checked: true})
+            } else {
+                setChecked(false)
+                onPress({ userId, checked: false})
+            }            
+        }
     }
     
     return (

@@ -91,11 +91,11 @@ const SearchUsers = ({ data, onSearchChange }) => (
     <SearchBar style={styles.searchBar} Users={data} onSearchChange={onSearchChange}  />
 )
 
-const UsersList = ({ users, setCheckedUsers, reset }) => {
+const UsersList = ({ users, setCheckedUsers, selectedUsers }) => {
     const keyExtractor = (_, index) => index.toString()
 
     const renderItem = ({ item }) => {
-        return <SelectCheckBox onPress={setCheckedUsers} reset={reset} {...item} />
+        return <SelectCheckBox onPress={setCheckedUsers} selectedUsers={selectedUsers} {...item} />
     }
 
     return(
@@ -112,7 +112,7 @@ const UsersList = ({ users, setCheckedUsers, reset }) => {
 
 const SendButton = ({ handleOnPress }) => {
     return(
-        <Button color="#ff7600" labelStyle={{ fontSize: 18, color: "#FFF" }} style={{ margin: 10, marginBottom: 20 }} mode="contained" onPress={handleOnPress}>
+        <Button color="#FFA500" labelStyle={{ fontSize: 18, color: "#FFF" }} style={{ margin: 10, marginBottom: 20 }} mode="contained" onPress={handleOnPress}>
             Envoyer
         </Button>
     )
@@ -128,7 +128,6 @@ class videoScreen extends Component{
             selectedUsers: [],
             videoTitle: '',
             videoDiscr: '',
-            resetCheckedUsers: false
         }
     }
 
@@ -161,11 +160,6 @@ class videoScreen extends Component{
     }
 
     onSearchChange = (users) => {
-        const{ resetCheckedUsers } = this.state
-
-        if(resetCheckedUsers){
-            this.setState({resetCheckedUsers: false})
-        }
 
         this.setState({ users })
     }
@@ -173,12 +167,8 @@ class videoScreen extends Component{
     setCheckedUsers = ({ userId, checked }) => {
         const{ selectedUsers, resetCheckedUsers } = this.state
 
-        if(resetCheckedUsers){
-            this.setState({resetCheckedUsers: false})
-        }
-
        if(checked){
-            this.setState({ selectedUsers: [...selectedUsers, userId] })
+            this.setState({ ...this.state, selectedUsers: [...selectedUsers, userId] })
        } else {
             const userIndex = selectedUsers.indexOf(userId)
             selectedUsers.splice(userIndex, 1)
@@ -187,9 +177,8 @@ class videoScreen extends Component{
     }
 
     handleOnPress = () => {
-        const{ url, selectedUsers, videoTitle, videoDiscr, resetCheckedUsers } = this.state
+        const{ url, selectedUsers, videoTitle, videoDiscr } = this.state
         let validation = true
-        this.setState({ resetCheckedUsers: false })
         
         if(url.trim().length === 0){
             validation = false
@@ -207,6 +196,10 @@ class videoScreen extends Component{
             validation = false
         }
 
+        if(!validation){
+            alert("Completez les champs ⚠️")
+        }
+
         if(validation){
             firebase.firestore().collection("videos").add({
                 title: videoTitle,
@@ -220,15 +213,17 @@ class videoScreen extends Component{
                     videoTitle: '',
                     videoDiscr: '',
                     selectedUsers: [],
-                    resetCheckedUsers: true
                  })
+                 alert("Vidéo bien envoyée ✔️")
             })
-            .catch(err => console.log(err))
+            .catch(err => {
+                alert("Server Error ❌")
+            })
         }
     }
 
     render(){
-        const{ data, users, resetCheckedUsers, url, videoDiscr, videoTitle } = this.state
+        const{ data, users, url, videoDiscr, videoTitle, selectedUsers } = this.state
 
         const Data = [
             {
@@ -245,7 +240,7 @@ class videoScreen extends Component{
                 name: "usersList",
                 users: users,
                 setCheckedUsers: this.setCheckedUsers,
-                reset: resetCheckedUsers
+                selectedUsers: selectedUsers,
             },
             {
                 name: "Submit Btn",

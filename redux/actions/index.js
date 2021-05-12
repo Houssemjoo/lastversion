@@ -11,7 +11,8 @@ export function fetchUser() {
         .get()
         .then((snapshot) => {
             if(snapshot.exists){
-                dispatch({type: USER_STATE_CHANGE, currentUser: snapshot.data()})
+                const userId = snapshot.id
+                dispatch({type: USER_STATE_CHANGE, currentUser: {...snapshot.data(), userId}})
             } else {
                 dispatch({type: USER_STATE_CHANGE, currentUser: null})
             }
@@ -44,19 +45,19 @@ export const UpdateUser = (user) => {
 export const FetchUsers = () => {
     return ((dispatch) => {
         firebase.firestore()
-        .collection("users")
-        .where('role', '==', 'client')
-        .get()
-        .then((querySnapshot) => {
-            const users = []
-            querySnapshot.forEach(documentSnapshot => {
-                const userId = documentSnapshot.id
-                const userData = documentSnapshot.data()
-                users.push({ ...userData, userId })
+            .collection("users")
+            .where('role', '==', 'client')
+            .get()
+            .then((querySnapshot) => {
+                const users = []
+                querySnapshot.forEach(documentSnapshot => {
+                    const userId = documentSnapshot.id
+                    const userData = documentSnapshot.data()
+                    users.push({ ...userData, userId })
+                })
+                dispatch({ type: USERS_STATE, users: users })
             })
-            dispatch({ type: USERS_STATE, users: users })
-        })
-        .catch(err => console.log(err))
+            .catch(err => console.log(err))
     })
 }
 
@@ -70,5 +71,7 @@ export const RemoveUser = ({ userId }) => {
                 dispatch({ type: REMOVE_USER, userId })
             })
             .catch(err => console.log(err))
+
+        firebase.auth().currentUser()
     })
 }

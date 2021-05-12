@@ -102,7 +102,7 @@ export class EditProfileScreen extends PureComponent {
               })
           })
           .catch(err => console.log(err))
-      } alert('Informations modifiées')
+      } alert('Modification avec succès ✔️')
     }
 
   uploadImage = async (uri) => {

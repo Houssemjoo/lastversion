@@ -20,7 +20,7 @@ function OnBoarding() {
         if(currentIndex < slides.length-1){
             slidesRef.current.scrollToIndex({index: currentIndex+1})
         }else {
-            alert ('Dernier exercice ❤❤ ')
+            alert (`Fin d'exercices  ✅`)
         }
     }
 

@@ -17,29 +17,61 @@ import { connect } from 'react-redux'
 
 export class ClientDashboard extends PureComponent {
 
+    state = {
+        videosTotal: 0
+    }
+
     logout = () => {
         firebase.auth()
         .signOut()
     }
     
+    async componentDidMount(){
+        const{ userId } = this.props.userState.currentUser
+
+       const videosTotal = await this.FetchVideosCount({ userId })
+
+       if(videosTotal){
+            this.setState({ videosTotal })
+       }
+    }
+
+    FetchVideosCount = async ({ userId }) => {
+        try {
+            const querySnapshot =  await firebase.firestore().collection("videos").where('usersId', 'array-contains', `${userId}`).get()
+      
+            if(!querySnapshot.exists){
+                return querySnapshot.size
+            }
+
+            return null
+        } catch(err) {
+            return null
+        }
+    }
+      
     render() {
         const { address = "", email = "", firstName = "", lastName = "", num = "", role = "", sourceImg = "" } = this.props.userState.currentUser
-        
+        const{ videosTotal } = this.state
+
         return (
             <SafeAreaView style = {styles.container}>
                 <ScrollView>
-                    <View style = {styles.userInfoSection}>
+                    <View style = {{flex: 1, paddingHorizontal: 20, marginBottom: 20 }}>
                         <View style={{ flexDirection: 'row', marginTop: 15 }} >
                           
                             <UserImage sourceUrl={sourceImg} />
 
-                            <View style={{ flex: 1, marginHorizontal: 10, justifyContent: "flex-start", alignItems: "center" }}>
+                            <View style={{ flex: 1, marginHorizontal: 15, justifyContent: "flex-start", alignItems: "flex-start" }}>
                                 <Title style={[styles.title, {
-                                marginTop:15,
-                                marginBottom: 5,
-                                marginLeft: 10,
-                                flexShrink: 1,
-                                }]}>{lastName} {firstName} </Title>
+                                    marginTop:15,
+                                    marginBottom: 5,
+                                    marginLeft: 10,
+                                    flexShrink: 1,
+                                    }]}
+                                >
+                                    {lastName} {firstName}
+                                </Title>
                             </View>
                         </View>
                     </View>
@@ -65,8 +97,8 @@ export class ClientDashboard extends PureComponent {
                             borderRightColor: '#dddddd',
                             borderRightWidth: 1
                         }]}>
-                            <Title>4</Title>
-                            <Caption>Videos</Caption>
+                            <Title>{ videosTotal }</Title>
+                            <Caption>Vidéos</Caption>
                         </View>
                         <View style={styles.infoBox}>
                             <Title>12</Title>
@@ -77,26 +109,28 @@ export class ClientDashboard extends PureComponent {
                     <View tyle={styles.menuWrapper}>
                         <TouchableRipple onPress={() => {this.props.navigation.navigate("Videos")}}>
                             <View style={styles.menuItem}>
-                                <Icon name="video-3d-variant" color="#FF6347" size={25}/>
+                                <Icon name="video-3d-variant" color="#FFA500" size={25}/>
                                 <Text style={styles.menuItemText}>Mes Vidéos</Text>
                             </View>
                         </TouchableRipple>
-                        <TouchableRipple onPress={() => {this.props.navigation.navigate("Preview")}}>
+
+                        <TouchableRipple onPress={() => {this.props.navigation.navigate('Exercices')}}>
                             <View style={styles.menuItem}>
-                                <Icon name="share-outline" color="#FF6347" size={25}/>
-                                <Text style={styles.menuItemText}>Envoyer</Text>
+                                <Icon name="run-fast" color="#FFA500" size={25}/>
+                                <Text style={styles.menuItemText}>Mes Exercices</Text>
                             </View>
                         </TouchableRipple>
                         
+                        
                         <TouchableRipple  onPress={() => {this.props.navigation.navigate("EditProfile")}}>
                             <View style={styles.menuItem}>
-                                <Icon name="file-document-edit-outline" color="#FF6347" size={25}/>
+                                <Icon name="file-document-edit-outline" color="#FFA500" size={25}/>
                                 <Text style={styles.menuItemText}>Modifier</Text>
                             </View>
                         </TouchableRipple>
                         <TouchableRipple  onPress={() => this.logout()}>
                             <View style={styles.menuItem}>
-                                <Icon name="logout-variant" color="#FF6347" size={25}/>
+                                <Icon name="logout-variant" color="#FFA500" size={25}/>
                                 <Text style={styles.menuItemText}>Se Déconnecter </Text>
                             </View>
                         </TouchableRipple>
@@ -114,12 +148,13 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps)(ClientDashboard)
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-      },
+        container: {
+            flex: 1,
+        },
       userInfoSection: {
         paddingHorizontal: 30,
-        marginBottom: 25,
+        marginBottom: 5,
+        marginTop: 10
       },
       title: {
         fontSize: 22,
@@ -131,7 +166,7 @@ const styles = StyleSheet.create({
       },
       row: {
         flexDirection: 'row',
-        marginBottom: 20,
+        marginBottom: 15,
       },
       infoBoxWrapper: {
         borderBottomColor: '#dddddd',
@@ -139,7 +174,8 @@ const styles = StyleSheet.create({
         borderTopColor: '#dddddd',
         borderTopWidth: 1,
         flexDirection: 'row',
-        height: 100,
+        height: 80,
+        marginVertical: 15
       },
       infoBox: {
         width: '50%',
