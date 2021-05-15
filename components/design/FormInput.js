@@ -1,16 +1,31 @@
 import React from 'react';
-import { View, TextInput, StyleSheet } from 'react-native';
-import { windowHeight } from '../utils/Dimensions';
- 
-import AntDesign from 'react-native-vector-icons/AntDesign';
- 
-const FormInput = ({labelValue, placeholderText, iconType, keyboardTypeType, ...rest}) => {
+import { View, StyleSheet } from 'react-native';
+import { TextInput } from 'react-native-paper'
+import ErrorFieldMessage from '../ErrorFieldMessage/ErrorFieldMessage'
+
+const displayError = (field, fieldsErrors) => {
+  const errorIndex = fieldsErrors.map((f) => f.field).indexOf(field)
+  
+  return  fieldsErrors[errorIndex].message
+}
+
+const visibleError = (field, fieldsErrors) => {
+  const msgs = displayError(field, fieldsErrors)
+
+  if(msgs.length > 0){
+      return true;
+  }
+
+  return false;
+}
+
+const FormInput = ({ labelValue, placeholderText, iconType, keyboardTypeType, textInputref, msgs, fieldName, fieldsErrors,  ...rest }) => {
   return (
     <View style={styles.inputContainer}>
-      <View style={styles.iconStyle}>
-        <AntDesign name={iconType} size={25} color="#666" />
-      </View>
       <TextInput
+        error={visibleError(fieldName, fieldsErrors)}
+        ref={textInputref}
+        left={<TextInput.Icon icon={iconType} color={"#555"} />}
         value={labelValue}
         style={styles.input}
         numberOfLines={1}
@@ -19,8 +34,9 @@ const FormInput = ({labelValue, placeholderText, iconType, keyboardTypeType, ...
         keyboardType={keyboardTypeType}
         {...rest}
       />
+      <ErrorFieldMessage msgs={displayError(fieldName, fieldsErrors)} />
     </View>
-  );
+  )
 };
  
 export default FormInput;
@@ -30,29 +46,13 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginBottom: 10,
     width: '100%',
-    height: windowHeight / 15,
-    borderColor: '#ccc',
-    borderRadius: 3,
-    borderWidth: 1,
     flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#fff',
-  },
-  iconStyle: {
-    padding: 10,
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRightColor: '#ccc',
-    borderRightWidth: 1,
-    width: 50,
+    flexDirection: "column"
   },
   input: {
-    padding: 10,
     flex: 1,
-    fontSize: 16,
-    color: '#333',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#FFF",
+    paddingVertical: 0
   },
 });

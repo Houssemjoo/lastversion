@@ -6,7 +6,7 @@ const {width} = useWindowDimensions()
     return (
         <View style = {[styles.container, {width}]}>
             <Image 
-            source = {item.image} 
+            source = {{uri: item.image}} 
             style = {[styles.image, {width, resizeMode :'contain'}]}
             />
             <View  style = {{flex : 0.3}}>

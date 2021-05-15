@@ -56,11 +56,10 @@ export class Account extends PureComponent {
                     </View>
       
                     <View tyle={styles.menuWrapper}>
-
-                        <TouchableRipple onPress={() => {}}>
+                        <TouchableRipple onPress={() => { this.props.navigation.navigate('SendExercices') }}>
                             <View style={styles.menuItem}>
                                 <Icon name="share-outline" color="#FFA500" size={25}/>
-                                <Text style={styles.menuItemText}>Envoyer</Text>
+                                <Text style={styles.menuItemText}>Envoyer des exercices</Text>
                             </View>
                         </TouchableRipple>
 

@@ -37,6 +37,7 @@ import SingleUserScreen from './screens/SingleUser'
 import SingleVideoScreen from './screens/SingleVideo'
 import ExercicesScreen from './screens/Exercices'
 import SingleRapportScreen from './screens/SingleRapport'
+import SendExercicesScreen from './screens/SendExercices'
 
 const Stack = createStackNavigator()
 const Stacklog = createStackNavigator()
@@ -93,6 +94,7 @@ export default function App() {
                 <Stacklog.Screen name="Single User" component={SingleUserScreen} options={{ headerShown: false }}/>
                 <Stacklog.Screen name="Exercices" component={ExercicesScreen} options={{ headerShown: true }}/>
                 <Stacklog.Screen name="SingleRapport" component={SingleRapportScreen} options={{ headerShown: false }}/>
+                <Stacklog.Screen name="SendExercices" component={SendExercicesScreen} options={{ headerShown: false }}/>
               </Stacklog.Navigator>
               :
               null

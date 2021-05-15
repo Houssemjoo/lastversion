@@ -32,7 +32,6 @@ const User = ({ userData }) => {
     )
 }
 
-
 const Video = ({ videoData }) => {
     const handleOpenLink = (url) => {
         Linking.openURL(url);
@@ -64,7 +63,7 @@ const RapportInfo = ({ rapport }) => {
                 <Text style={{color: "#777", marginLeft: 5}}>{rapport.nbrRep}</Text>
             </View>
             <View style={{flex: 1, marginHorizontal: 15, marginVertical: 8}}>
-                <Text style={{color: "#333", marginLeft: 5, marginVertical: 5}}>Quel est l'intensité de votre douleur ? : </Text>
+                <Text style={{color: "#333", marginLeft: 5, marginVertical: 5}}>Quel est l'intensité de votre douleur ? </Text>
                 <Text style={{color: "#777", marginLeft: 5}}>{rapport.intensity} /10</Text>
             </View>
             <View style={{flex: 1, marginHorizontal: 15, marginVertical: 8}}>

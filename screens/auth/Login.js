@@ -1,80 +1,193 @@
 import React, { Component } from 'react'
-import { View, Image, StyleSheet,  SafeAreaView, ScrollView } from 'react-native' 
+import { View, Image, StyleSheet,  SafeAreaView, ScrollView, Text } from 'react-native' 
 import firebase from 'firebase/app'
 import 'firebase/auth'
-import SocialButton from '../../components/design/SocialButton'
 import FormButton from '../../components/design/FormButton'
 import FormInput from '../../components/design/FormInput'
-import loginImg from '../../images/login1.gif'
+import loginImg from '../../assets/icon.png'
+import FacebookButton from '../../components/FacebookButton/FacebookButton'
+import GoogleButton from '../../components/GoogleButton/GoogleButton'
+import { Button, Snackbar  } from 'react-native-paper'
 
 export class Login extends Component {
     constructor(props) {
         super(props);
             this.state = {
                 email: '',
-                password: ''
+                password: '',
+                visible: false,
+                firebaseError: null,
+                fieldsErrors: [
+                  {
+                      field: "email",
+                      message: []
+                  },
+                  {
+                      field: "password",
+                      message: []
+                  }
+              ]
             }
     }
     
+    componentDidMount(){
+      
+    }
+
     onSignIn = () => {
-        const { email, password }= this.state;
-        firebase.auth().signInWithEmailAndPassword(email, password)
-        .then((result) => {
-          //
-        })
-        .catch((error)=> {
-            console.log(error)
-        })
+        const { email, password, fieldsErrors } = this.state
+        let validation = true
+
+        if(email.trim().length === 0){
+          validation = false
+          const errorMessage = "Adresse e-mail est obligatoire"
+          
+          const errorIndex = fieldsErrors.map((f) => f.field).indexOf("email")
+
+          let messages = fieldsErrors[errorIndex].message;
+
+          const msgIndex = messages.indexOf(errorMessage)
+
+          if(msgIndex === -1){
+              fieldsErrors[errorIndex].message = [...messages, errorMessage]
+          }
+
+          this.setState({
+              ...this.state,
+              fieldsErrors: fieldsErrors
+          })
+        }
+
+        if(password.trim().length === 0){
+          validation = false
+          const errorMessage = "Mot de passe est obligatoire"
+          
+          const errorIndex = fieldsErrors.map((f) => f.field).indexOf("password")
+
+          let messages = fieldsErrors[errorIndex].message;
+
+          const msgIndex = messages.indexOf(errorMessage)
+
+          if(msgIndex === -1){
+              fieldsErrors[errorIndex].message = [...messages, errorMessage]
+          }
+
+          this.setState({
+              ...this.state,
+              fieldsErrors: fieldsErrors
+          })
+        }
+
+        if(validation){
+          firebase.auth().signInWithEmailAndPassword(email, password)
+          .then((result) => {
+            //
+          })
+          .catch((error)=> {
+              this.setState({
+                visible: true,
+                firebaseError: error.message
+              })
+          })
+        }
+    }
+
+    handelInputchange = (val, field)  => {
+      const errorIndex = this.state.fieldsErrors.map((f) => f.field).indexOf(field)
+
+      this.state.fieldsErrors[errorIndex].message = []
+
+      this.setState({ ...this.state, fieldsErrors: this.state.fieldsErrors, [field]: val })
+    }
+
+    onDismissSnackBar = () => {
+      this.setState({ visible: false, firebaseError: null })
     }
 
     render() {
+      const{ fieldsErrors, firebaseError, visible } = this.state
+
       return (
-        <SafeAreaView style={{flex: 1, backgroundColor: "#FFF", paddingHorizontal: 10, paddingVertical: 20}}>
-          <ScrollView>
-            <View style={{flex: 1}}>
-                <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
-                    <Image
-                        source={loginImg}
-                        style={styles.logo}
-                    />
-                    <FormInput
-                        onChangeText={(email) => this.setState({ email })}
-                        placeholderText="Email"
-                        iconType="user"
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                    />
-                    <FormInput
-                        onChangeText={(password) => this.setState({ password })}
-                        placeholderText="Password"
-                        iconType="lock"
-                        secureTextEntry={true}
-                    />
-                    <FormButton
-                        buttonTitle="Se connecter"
-                        onPress={() => {this.onSignIn()}}
-                    />
+        <SafeAreaView style={{flex: 1, paddingHorizontal: 10}}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={{flex: 1, marginBottom: 40}}>
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center", elevation: 2, padding: 16, backgroundColor: "#FFF", marginTop: 20, borderRadius: 5 }}>
+                        <Image
+                            source={loginImg}
+                            style={styles.logo}
+                        />
+
+                        <FormInput
+                            onChangeText={(email) => this.handelInputchange(email, 'email')}
+                            placeholderText="Adresse e-mail"
+                            iconType="account"
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            theme={{ colors: { primary: "#999" } }}
+                            fieldsErrors={fieldsErrors}
+                            fieldName="email"
+                        />
+
+                        <FormInput
+                            onChangeText={(password) => this.handelInputchange(password, 'password')}
+                            placeholderText="Mot de passe"
+                            iconType="lock"
+                            secureTextEntry={true}
+                            theme={{ colors: { primary: "#999" } }}
+                            fieldsErrors={fieldsErrors}
+                            fieldName="password"
+                        />
+
+                        <FormButton
+                            buttonTitle="Se connecter"
+                            onPress={() => {this.onSignIn()}}
+                        />
                 </View>
 
-                <SocialButton 
-                  buttonTitle="Se connecter avec Facebook"
-                  btnType="facebook"
-                  color="#4867aa"
-                  backgroundColor="#e6eaf4"
-                  onPress={() => {}}
+                <View style={styles.registerField}>
+                    <Text style={styles.registerLabel}>Nouveau sur Kine ?</Text>
+                    <Button 
+                      style='text' 
+                      onPress={() => {this.props.navigation.navigate('Register')}}
+                      color='#32CD32'
+                    > 
+                        Créer un compte 
+                    </Button>
+                </View>
+
+                <View style={styles.dividerContainer}>
+                  <View style={styles.divider} />
+                  <Text style={styles.dividerText}>OU</Text>
+                  <View style={styles.divider} />
+                </View>
+
+                <FacebookButton 
+                    onPress={() => {}}
                 />
-                
-                <SocialButton 
-                  buttonTitle="Se connecter avec Google"
-                  btnType="google"
-                  color="#de4d41"
-                  backgroundColor="#f5e7ea"
-                  onPress={() => {}}
+
+                <GoogleButton 
+                    onPress={() => {}} 
                 />
 
             </View>
           </ScrollView>
+
+          <View style={styles.snackContainer}>
+                  <Snackbar
+                    style={{backgroundColor: "#F00", color: "#FFF"}}
+                    theme={{ colors: { accent: 'white' }}}
+                    visible={visible}
+                    onDismiss={this.onDismissSnackBar}
+                    action={{
+                      label: 'X',
+                      onPress: () => {
+                        // Do something
+                      },
+                    }}>
+                    {firebaseError}
+                  </Snackbar>
+            </View>
         </SafeAreaView>
         )
     }
@@ -83,6 +196,10 @@ export class Login extends Component {
 export default Login
 
 const styles = StyleSheet.create({
+    snackContainer: {
+      flex: 1,
+      justifyContent: 'space-between',
+    },
     container: {
       backgroundColor: 'white',
       flex: 1,
@@ -94,8 +211,7 @@ const styles = StyleSheet.create({
     logo: {
       height: 150,
       width: 150,
-      marginBottom: 80,
-      marginTop:20
+      marginTop: 5
     },
     text: {
       fontSize: 28,
@@ -112,5 +228,30 @@ const styles = StyleSheet.create({
       fontSize: 18,
       fontWeight: '500',
       color: '#2e64e5',
+    },
+    registerField:{
+      flexDirection: "row",
+      marginVertical: 10,
+      alignItems: "center",
+      justifyContent: "center"
+    },
+    registerLabel:{
+        color: "#888",
+        fontSize: 16,
+        marginRight: 5
+    },
+    dividerContainer:{
+      flexDirection: "row",
+      alignItems: "center",
+      marginVertical: 15
+    },
+    dividerText:{
+        marginHorizontal: 10
+    },
+    divider:{
+        flex: 1,
+        height: 0.5,
+        backgroundColor: "#888",
+        width: "100%"
     }
 });

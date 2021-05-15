@@ -1,27 +1,22 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent } from 'react'
 import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   StyleSheet,
   SafeAreaView, 
   ScrollView,
 } from 'react-native';
-import { Button } from 'react-native-paper'
+import { Button, TextInput } from 'react-native-paper'
 
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
 import 'firebase/storage'
 
-import * as ImagePicker from 'expo-image-picker';
+import * as ImagePicker from 'expo-image-picker'
 
-import { withTheme  } from 'react-native-paper';
-
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import Feather from 'react-native-vector-icons/Feather';
+import { withTheme } from 'react-native-paper'
 
 import EditProfileUserImg from '../components/EditProfileUserImg/EditProfileUserImg'
 
@@ -55,9 +50,12 @@ export class EditProfileScreen extends PureComponent {
     handleEditProfile = async () => {
       let errorForm = false
       const{ sourceImg, firstName, lastName, address, num, email, image } = this.state
-      const { role } = this.props.userState.currentUser
+      const { role, userId } = this.props.userState.currentUser
+      let imgUrl = sourceImg
 
-      let imgUrl = await this.uploadImage(image) || sourceImg
+      if(image && image !== null && image.length > 0){
+        imgUrl = await this.uploadImage(image)
+      }
       
       if(!firstName && firstName.length === 0){
         errorForm = true
@@ -91,6 +89,7 @@ export class EditProfileScreen extends PureComponent {
               sourceImg: imgUrl
           })
           .then(() => {
+              alert('Modification effectuée ✅')
               this.props.UpdateUser({
                 firstName,
                 lastName,
@@ -101,8 +100,8 @@ export class EditProfileScreen extends PureComponent {
                 role
               })
           })
-          .catch(err => console.log(err))
-      } alert('Modification avec succès ✔️')
+          .catch(err => alert('Server error ❌'))
+      }
     }
 
   uploadImage = async (uri) => {
@@ -162,9 +161,9 @@ export class EditProfileScreen extends PureComponent {
             </View>
 
             <View style={styles.action}>
-              <FontAwesome name="user-o" color={colors.text} size={20} />
               <TextInput
                 placeholder="Prénom"
+                left={<TextInput.Icon icon="account" color={"#555"} />}
                 placeholderTextColor="#666666"
                 value={firstName}
                 autoCorrect={false}
@@ -173,20 +172,15 @@ export class EditProfileScreen extends PureComponent {
                   styles.textInput,
                   {
                     color: colors.text,
-                    borderColor: '#ccc',
-                    borderRadius: 3,
-                    borderWidth: 0.7,
-                    marginLeft:12,
-                    marginBottom:5
                   },
                 ]}
               />
             </View>
 
             <View style={styles.action}>
-              <FontAwesome name="user-o" color={colors.text} size={20} />
               <TextInput
                 placeholder="Nom"
+                left={<TextInput.Icon icon="account" color={"#555"} />}
                 value={lastName}
                 placeholderTextColor="#666666"
                 autoCorrect={false}
@@ -195,21 +189,16 @@ export class EditProfileScreen extends PureComponent {
                   styles.textInput,
                   {
                     color: colors.text,
-                    borderColor: '#ccc',
-                    borderRadius: 3,
-                    borderWidth: 0.7,
-                    marginLeft:12,
-                    marginBottom:5
                   },
                 ]}
               />
             </View>
 
             <View style={styles.action}>
-              <Feather name="phone" color={colors.text} size={20} />
               <TextInput
                 placeholder="Téléphone"
                 value={num}
+                left={<TextInput.Icon icon="phone" color={"#555"} />}
                 placeholderTextColor="#666666"
                 keyboardType="number-pad"
                 autoCorrect={false}
@@ -218,20 +207,15 @@ export class EditProfileScreen extends PureComponent {
                   styles.textInput,
                   {
                     color: colors.text,
-                    borderColor: '#ccc',
-                    borderRadius: 3,
-                    borderWidth: 0.7,
-                    marginLeft:12,
-                    marginBottom:5
                   },
                 ]}
               />
             </View>
 
             <View style={styles.action}>
-              <FontAwesome name="envelope-o" color={colors.text} size={20} />
               <TextInput
                 placeholder="Email"
+                left={<TextInput.Icon icon="email" color={"#555"} />}
                 value={email}
                 placeholderTextColor="#666666"
                 keyboardType="email-address"
@@ -241,20 +225,15 @@ export class EditProfileScreen extends PureComponent {
                   styles.textInput,
                   {
                     color: colors.text,
-                    borderColor: '#ccc',
-                    borderRadius: 3,
-                    borderWidth: 0.7,
-                    marginLeft:12,
-                    marginBottom:5
                   },
                 ]}
               />
             </View>
 
             <View style={styles.action}>
-              <Icon name="map-marker-outline" color={colors.text} size={20} />
               <TextInput
                 placeholder="Adresse"
+                left={<TextInput.Icon icon="map-marker" color={"#555"} />}
                 placeholderTextColor="#666666"
                 value={address}
                 autoCorrect={false}
@@ -263,16 +242,12 @@ export class EditProfileScreen extends PureComponent {
                   styles.textInput,
                   {
                     color: colors.text,
-                    borderColor: '#ccc',
-                    borderRadius: 3,
-                    borderWidth: 0.7,
-                    margin:12
                   },
                 ]}
               />
             </View>
 
-            <Button labelStyle={{color: "#FFF", fontSize: 18}} style={{ marginTop: 30 }} mode='contained' color='#FF6347' styleContent={styles.commandButton} onPress={this.handleEditProfile}>
+            <Button labelStyle={{color: "#FFF", fontSize: 18}} style={{ marginTop: 10 }} mode='contained' color='#FFA500' styleContent={styles.commandButton} onPress={this.handleEditProfile}>
               Modifier
             </Button>
           </ScrollView>

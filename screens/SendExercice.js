@@ -2,36 +2,31 @@ import React, { Component } from 'react'
 import firebase from 'firebase/app'
 import 'firebase/firestore'
 import 'firebase/auth'
-import { Text, View, StyleSheet, FlatList } from 'react-native'
-import { Button, TextInput }  from 'react-native-paper'
 import { connect } from 'react-redux'
+import { View, FlatList, StyleSheet } from 'react-native'
+import { Button, TextInput  }  from 'react-native-paper'
 import { FetchUsers }  from '../redux/actions'
+import ExerciceImage from '../components/ExerciceImage/ExerciceImage'
+import * as ImagePicker from 'expo-image-picker'
 
 import UsersList from '../components/SearchUsers/UsersList/UsersList'
 import SearchBar from '../components/SearchUsers/SearchBar/SearchBar'
 
+const InputField = ({ handleTextChange, state, handlePress }) => {
 
-const InputField = ({ handleTextChange, state }) => (
-    <View style={styles.card}>
-        <Text style={{ fontSize: 16, color: "#444" }}>Ajouter votre vidéo url :</Text>
+    return(
+        <View style={styles.card}>
 
-        <TextInput
-            value={state.url}
-            onChangeText={(val) => handleTextChange(val, 'url')}
-            style={{ marginVertical: 15, height: 50 }}
-            placeholder="Url*"
-            left={<TextInput.Icon icon={"link-plus"} color={"#555"} />}
-            keyboardType="default"
-            autoCapitalize="none"
-            autoCorrect={false}
-            theme={{ colors: { primary: "#999" } }}
+        <ExerciceImage
+            handlePress={handlePress}
+            image={state.image}
         />
 
         <TextInput
             value={state.videoTitle}
-            onChangeText={(val) => handleTextChange(val, 'videoTitle')}
+            onChangeText={(val) => handleTextChange(val, 'exerciceTitle')}
             style={{ marginVertical: 15, height: 50 }}
-            placeholder="Titre de vidéo*"
+            placeholder="Titre de exercice*"
             keyboardType="default"
             autoCapitalize="none"
             autoCorrect={false}
@@ -40,16 +35,19 @@ const InputField = ({ handleTextChange, state }) => (
 
         <TextInput
             value={state.videoDiscr}
-            onChangeText={(val) => handleTextChange(val, 'videoDiscr')}
+            onChangeText={(val) => handleTextChange(val, 'exerciceDiscr')}
             style={{ marginVertical: 15, height: 50 }}
-            placeholder="Description de vidéo*"
+            placeholder="Description de exercice*"
             keyboardType="default"
             autoCapitalize="none"
             autoCorrect={false}
             theme={{ colors: { primary: "#999" } }}
         />
+
     </View>
-)
+    )
+}
+
 
 const SendButton = ({ handleOnPress }) => {
     return(
@@ -59,16 +57,16 @@ const SendButton = ({ handleOnPress }) => {
     )
 }
 
-class videoScreen extends Component{
+class SendExercice extends Component {
     constructor(props){
         super(props)
         this.state = {
-            url: '',
+            image: null,
             data: [],
             users: [],
             selectedUsers: [],
-            videoTitle: '',
-            videoDiscr: '',
+            exerciceTitle: '',
+            exerciceDiscr: '',
         }
     }
 
@@ -101,12 +99,11 @@ class videoScreen extends Component{
     }
 
     onSearchChange = (users) => {
-
         this.setState({ users })
     }
 
     setCheckedUsers = ({ userId, checked }) => {
-        const{ selectedUsers, resetCheckedUsers } = this.state
+        const{ selectedUsers } = this.state
 
        if(checked){
             this.setState({ ...this.state, selectedUsers: [...selectedUsers, userId] })
@@ -117,19 +114,19 @@ class videoScreen extends Component{
        }
     }
 
-    handleOnPress = () => {
-        const{ url, selectedUsers, videoTitle, videoDiscr } = this.state
+    handleOnPress = async () => {
+        const{ image, selectedUsers, exerciceTitle, exerciceDiscr } = this.state
         let validation = true
-        
-        if(url.trim().length === 0){
+   
+        if(image === null){
             validation = false
         }
 
-        if(videoTitle.trim().length === 0){
+        if(exerciceTitle.trim().length === 0){
             validation = false
         }
 
-        if(videoDiscr.trim().length === 0){
+        if(exerciceDiscr.trim().length === 0){
             validation = false
         }
 
@@ -142,20 +139,22 @@ class videoScreen extends Component{
         }
 
         if(validation){
-            firebase.firestore().collection("videos").add({
-                title: videoTitle,
-                description: videoDiscr,
-                url: url,
+            const imgUrl = await this.uploadImage(image)
+            
+            firebase.firestore().collection("exercices").add({
+                title: exerciceTitle,
+                description: exerciceDiscr,
+                image: imgUrl,
                 usersId: selectedUsers
             })
             .then(() =>  {
                 this.setState({ 
-                    url: '',
-                    videoTitle: '',
-                    videoDiscr: '',
-                    selectedUsers: [],
+                    image: null,
+                    imageTitle: '',
+                    imageDiscr: '',
+                    selectedUsers: []
                  })
-                 alert("Vidéo bien envoyée ✔️")
+                 alert("Exercice bien envoyée ✔️")
             })
             .catch(err => {
                 alert("Server Error ❌")
@@ -163,14 +162,52 @@ class videoScreen extends Component{
         }
     }
 
+    uploadImage = async (uri) => {
+        const imageName = 'profileImage' + Date.now();
+    
+        const response = await fetch(uri);
+        const blob = await response.blob();
+    
+        const ref = firebase.storage().ref().child(`images/${imageName}`)
+    
+        return ref.put(blob).then(() => {
+          return ref.getDownloadURL().then(url => {
+            return url
+          })
+        })
+    }
+
+    pickImage = async () => {
+        const{ status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+  
+        if(status === 'granted'){
+          let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 4],
+            quality: 1,
+            base64: true
+          })
+  
+          if (!result.cancelled) {
+            this.setState({ image: result.uri })
+          }
+        }
+    }
+    
+    handlePress = () => {
+        this.pickImage()
+    }
+
     render(){
-        const{ data, users, url, videoDiscr, videoTitle, selectedUsers } = this.state
+        const{ data, users, image, imageDiscr, imageTitle, selectedUsers } = this.state
 
         const Data = [
             {
                 name: "InputField",
                 handleTextChange: this.handleTextChange,
-                state: {url, videoDiscr, videoTitle}
+                state: { image, imageDiscr, imageTitle },
+                handlePress: this.handlePress
             },
             {
                 name: "SearchUsers",
@@ -181,7 +218,7 @@ class videoScreen extends Component{
                 name: "usersList",
                 users: users,
                 setCheckedUsers: this.setCheckedUsers,
-                selectedUsers: selectedUsers,
+                selectedUsers: selectedUsers
             }
         ]
 
@@ -202,19 +239,17 @@ class videoScreen extends Component{
 
             return null
         }
-        
-   
 
         return(
-            <View style={{flex :1}}>
+            <View style={{flex: 1}}>
                 <FlatList 
                     data={Data}
                     renderItem={renderItem}
                     keyExtractor={keyExtractor}
                 />
-
                 <SendButton handleOnPress={this.handleOnPress} />
             </View>
+
         )
     }
 }
@@ -223,18 +258,15 @@ const mapStateToProps = (state) => ({
     usersState: state.usersState,
 })
 
-export default  connect(mapStateToProps, { FetchUsers })(videoScreen)
+export default  connect(mapStateToProps, { FetchUsers })(SendExercice)
 
 const styles = StyleSheet.create({
-   card:{
-    flex: 1,
-    backgroundColor: "#FFF", 
-    margin: 10, 
-    padding: 10, 
-    elevation: 1, 
-    borderRadius: 8
-   }
+    card: {
+        flex: 1,
+        backgroundColor: "#FFF", 
+        margin: 10, 
+        padding: 20, 
+        elevation: 2, 
+        borderRadius: 8
+    }
 })
-
-
-

@@ -4,7 +4,7 @@ import Svg , {G, Circle } from 'react-native-svg';
 import {AntDesign} from '@expo/vector-icons'
 
 
-function NextButton({percentage,scrollTo}) {
+function NextButton({percentage, scrollTo}) {
 
     const size = 128;
     const strokeWidth = 2;
@@ -46,7 +46,7 @@ function NextButton({percentage,scrollTo}) {
            <Circle 
            ref = {progRef}
 
-           stroke = '#E7E8E9' 
+           stroke = '#ffe9c0' 
            cx = {center} 
            cy = {center} 
            r = {radius} 

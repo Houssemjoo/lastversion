@@ -10,16 +10,16 @@ import { connect } from 'react-redux'
 import  { Button } from 'react-native-paper'
 
 export class Preview extends Component {
-        constructor(props) {
+    constructor(props) {
         super(props);
             this.state = {
-              nbrRep: '',
-              intensity: 5,
-              difficult: '',
-              done: '',
-              resume: '',
+                nbrRep: '',
+                intensity: 5,
+                difficult: '',
+                done: '',
+                resume: '',
             }
-        }
+    }
     
     onSendReview = () => {
         const { nbrRep, intensity, difficult, done, resume } = this.state
@@ -121,7 +121,7 @@ export class Preview extends Component {
 
                                     <View style={{ flex: 1, flexDirection: "row", marginBottom: 20, alignItems: "center" }}>
                                         <Text style={{fontSize: 18, textTransform: "capitalize", textDecorationLine: "underline"}}>intensité :</Text>
-                                        <Text style={{fontSize: 20, color: "#33FF69", marginLeft: 15}}>{intensity}</Text>
+                                        <Text style={{fontSize: 20, color: "#3ebd5f", marginLeft: 15}}>{intensity}</Text>
                                     </View>
                                         
                                 <View style={{marginBottom: 5}}>
@@ -159,9 +159,9 @@ export class Preview extends Component {
 
                                 <Button
                                     mode="contained"
-                                    color="#33FF69"
-                                    style={{marginBottom: 30}}
-                                    labelStyle={{fontSize: 18, color: "#FFF"}}
+                                    color="#3ebd5f"
+                                    style={{ marginBottom: 30 }}
+                                    labelStyle={{ fontSize: 18, color: "#FFF" }}
                                     onPress={this.onSendReview}
                                 >
                                     Envoyer  

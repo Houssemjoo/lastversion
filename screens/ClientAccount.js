@@ -16,9 +16,9 @@ import UserImage from '../components/UserImage/UserImage'
 import { connect } from 'react-redux'
 
 export class ClientDashboard extends PureComponent {
-
     state = {
-        videosTotal: 0
+        videosTotal: 0,
+        exercicesTotal: 0
     }
 
     logout = () => {
@@ -31,15 +31,27 @@ export class ClientDashboard extends PureComponent {
 
        const videosTotal = await this.FetchVideosCount({ userId })
 
+       const exercicesTotal = await this.FetchExercices({ userId })
+
        if(videosTotal){
-            this.setState({ videosTotal })
+            this.setState({ videosTotal, exercicesTotal })
        }
     }
+
+    FetchExercices = async ({ userId }) => {
+        const querySnapshot =  await firebase.firestore().collection("exercices").where('usersId', 'array-contains', `${userId}`).get()
+
+        if(!querySnapshot.exists){
+            return querySnapshot.size
+        }
+
+        return null
+    } 
 
     FetchVideosCount = async ({ userId }) => {
         try {
             const querySnapshot =  await firebase.firestore().collection("videos").where('usersId', 'array-contains', `${userId}`).get()
-      
+
             if(!querySnapshot.exists){
                 return querySnapshot.size
             }
@@ -52,7 +64,7 @@ export class ClientDashboard extends PureComponent {
       
     render() {
         const { address = "", email = "", firstName = "", lastName = "", num = "", role = "", sourceImg = "" } = this.props.userState.currentUser
-        const{ videosTotal } = this.state
+        const{ videosTotal, exercicesTotal } = this.state
 
         return (
             <SafeAreaView style = {styles.container}>
@@ -101,7 +113,7 @@ export class ClientDashboard extends PureComponent {
                             <Caption>Vidéos</Caption>
                         </View>
                         <View style={styles.infoBox}>
-                            <Title>12</Title>
+                            <Title>{ exercicesTotal }</Title>
                             <Caption>Exercices</Caption>
                         </View>
                     </View>
@@ -109,7 +121,7 @@ export class ClientDashboard extends PureComponent {
                     <View tyle={styles.menuWrapper}>
                         <TouchableRipple onPress={() => {this.props.navigation.navigate("Videos")}}>
                             <View style={styles.menuItem}>
-                                <Icon name="video-3d-variant" color="#FFA500" size={25}/>
+                                <Icon name="message-video" color="#FFA500" size={25}/>
                                 <Text style={styles.menuItemText}>Mes Vidéos</Text>
                             </View>
                         </TouchableRipple>

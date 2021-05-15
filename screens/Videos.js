@@ -84,7 +84,7 @@ export class Videos extends Component {
 
   async componentDidMount(){
     const{ userId } = this.props.userState.currentUser
-
+    
     const { videos, videosTotal } = await FetchVideos({ userId })
 
     this.setState({

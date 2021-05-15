@@ -1,27 +1,32 @@
-import React from 'react';
-import { StyleSheet } from 'react-native';
+import React from 'react'
+import { StyleSheet } from 'react-native'
 import { Button } from 'react-native-paper'
 
-const FormButton = ({buttonTitle, onPress}) => {
+const FormButton = ({ buttonTitle, onPress }) => {
   return (
-    <Button style={{marginTop: 15, marginBottom: 50,alignSelf: "stretch"}} onPress={onPress} labelStyle={styles.buttonText} mode="contained" contentStyle={styles.buttonContainer}>
-        {buttonTitle}
+    <Button labelStyle={styles.buttonText} style={styles.buttonStyle} contentStyle={styles.contentStyle} mode="contained" onPress={onPress}>
+      {buttonTitle}
     </Button>
   )
 }
 
-export default FormButton
+export default FormButton;
 
 const styles = StyleSheet.create({
-  buttonContainer: {
-    backgroundColor: '#2e64e5',
-    padding: 10,
+  contentStyle: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: '#FFA500',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 3,
+  },
+  buttonStyle:{
+    flex: 1,
+    width: '100%',
+    marginVertical: 15
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#ffffff',
   },
