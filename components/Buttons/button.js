@@ -5,7 +5,7 @@ import { Button } from 'react-native-paper'
 export default function FlatButton({text, onPress}) {
     return (
         <View style={{marginTop: 20}}>
-            <Button mode="outlined" color="#e67300" labelStyle={styles.buttonText} onPress={onPress} contentStyle={styles.button}>
+            <Button mode="outlined" color="#ee6425" labelStyle={styles.buttonText} onPress={onPress} contentStyle={styles.button}>
                 {text}
             </Button>
         </View>
@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
         padding: 5,
     },
     buttonText : {
-        color : '#e67300',
+        color : '#ee6425',
         fontWeight : 'bold',
         textTransform : 'uppercase',
         fontSize:16,

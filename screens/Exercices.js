@@ -6,8 +6,8 @@ import OnBoarding from '../components/Exercices/OnBoarding'
 export default function Exercices() {
   return (
     <View style={styles.container}>
+      <StatusBar animated={true} barStyle={"dark-content"} backgroundColor="#FFF" />
       <OnBoarding/>
-      <StatusBar style="auto" />
     </View>
   );
 }
@@ -19,4 +19,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+})

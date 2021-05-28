@@ -1,10 +1,11 @@
-import { USER_STATE_CHANGE, USERS_STATE, REMOVE_USER } from '../constants/index'
+import { USER_STATE_CHANGE, USERS_STATE, REMOVE_USER, TOGGLE_LOAD, USER_ERRORS } from '../constants/index'
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
 
 export function fetchUser() {
-    return ((dispatch) => {
+    return (async (dispatch) => {
+        dispatch({type: TOGGLE_LOAD})
         firebase.firestore()
         .collection("users")
         .doc(firebase.auth().currentUser.uid)
@@ -16,6 +17,9 @@ export function fetchUser() {
             } else {
                 dispatch({type: USER_STATE_CHANGE, currentUser: null})
             }
+        })
+        .catch((err) => {
+            dispatch({type: USER_ERRORS, errors: err})
         })
     })
 }

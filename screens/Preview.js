@@ -1,13 +1,14 @@
 import React, { Component } from 'react'
 import { Text, SafeAreaView, StyleSheet, View } from 'react-native'
-import Slider from '@react-native-community/slider';
-import { ScrollView } from 'react-native-gesture-handler';
+import Slider from '@react-native-community/slider'
+import { ScrollView } from 'react-native-gesture-handler'
 import ReviewInput from '../components/design/ReviewInput'
 import firebase from 'firebase/app'
 import 'firebase/firestore'
 import 'firebase/auth'
 import { connect } from 'react-redux'
 import  { Button } from 'react-native-paper'
+import { sendPushNotification } from '../utility/PushNotification'
 
 export class Preview extends Component {
     constructor(props) {
@@ -18,13 +19,31 @@ export class Preview extends Component {
                 difficult: '',
                 done: '',
                 resume: '',
+                adminExpoToken: []
             }
+    }
+
+    componentDidMount(){
+        firebase.firestore().collection("users").where('role', '==', 'admin').get()
+            .then((querySnapshot) => {
+                if(!querySnapshot.exists){
+                    const adminExpoToken = []
+                    querySnapshot.forEach(documentSnapshot => {
+                        const adminUser = documentSnapshot.data()
+                        adminExpoToken.push(adminUser.expoToken)
+                    })
+                    this.setState({ adminExpoToken: adminExpoToken  })
+                }
+            })
+            .catch(err => console.log(err))
     }
     
     onSendReview = () => {
-        const { nbrRep, intensity, difficult, done, resume } = this.state
-        const { userId } = this.props.userState.currentUser
+        const { nbrRep, intensity, difficult, done, resume, adminExpoToken } = this.state
+        const { userId, firstName, lastName } = this.props.userState.currentUser
         const{ videoId } = this.props.route.params
+
+        console.log(adminExpoToken)
 
         let validate = true
 
@@ -70,10 +89,16 @@ export class Preview extends Component {
                     difficult: "",
                     done: "",
                     resume: "",
-                })
-                alert("Bilan bien envoyé ✔️")
+             })
+
+            if(adminExpoToken && adminExpoToken.length > 0){
+                sendPushNotification({ expoPushToken: adminExpoToken, title: `Nouveau rapport 🆕`, body: `Vous recevez un nouveau rapport de : ${lastName} ${firstName} 👥`})
+            }
+
+            alert("Bilan bien envoyé ✔️")
             })
             .catch((err) => {
+                console.log(err)
                 alert("Server Error ❌")
             })
         }  

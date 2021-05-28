@@ -3,7 +3,6 @@ import { View, Text, SafeAreaView, ScrollView, StyleSheet } from 'react-native'
 import firebase from 'firebase/app'
 import 'firebase/firestore'
 import 'firebase/auth'
-import FacebookButton from '../../components/FacebookButton/FacebookButton'
 import GoogleButton from '../../components/GoogleButton/GoogleButton'
 import FormButton from '../../components/design/FormButton'
 import FormInput from '../../components/design/FormInput'
@@ -12,6 +11,7 @@ import { Button, Divider } from 'react-native-paper'
 import ErrorFieldMessage from '../../components/ErrorFieldMessage/ErrorFieldMessage'
 import PhoneInput from "react-native-phone-number-input"
 import EmailValidation from '../../utility/EmailValidation'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const FormWidth = windowWidth * 0.95
 
@@ -68,9 +68,11 @@ export class Register extends Component {
             this.phoneInputRef = React.createRef()
     }
 
-    handleRegister = () => {
+    handleRegister = async () => {
         const { email, password, RepeatPassword, lastName, firstName, address, phone, fieldsErrors }= this.state
         let validation = true
+
+        const expoPushToken = await AsyncStorage.getItem('expoPushToken')
         
         if(firstName.trim().length === 0){
             validation = false
@@ -137,7 +139,7 @@ export class Register extends Component {
         if(!EmailValidation(email)){
             validation = false
 
-            const errorMessage = "Adresse de messagerie est unvalide"
+            const errorMessage = "Adresse de messagerie est invalide"
 
             const errorIndex = fieldsErrors.map((f) => f.field).indexOf("email")
 
@@ -294,6 +296,7 @@ export class Register extends Component {
                     address,
                     role: "client",
                     sourceImg: "https://icon-library.com/images/user-profile-icon/user-profile-icon-12.jpg",
+                    expoToken: [expoPushToken]
                 }) 
             })
             .catch((error)=> {
@@ -347,23 +350,23 @@ export class Register extends Component {
                     <View style={{flex: 1, marginVertical: 5, marginBottom: 40}}>
                         <View style={{flex: 1, backgroundColor: "#fff", padding: 10, marginTop: 10, borderRadius: 10}}>
                             <FormInput
-                            value={firstName}
-                            onChangeText={firstName => this.handelInputchange(firstName, 'firstName')}
-                            placeholderText="Prénom"
-                            iconType="account"
-                            keyboardType="default"
-                            autoCapitalize="none"
-                            autoCompleteType="name"
-                            textContentType="givenName"
-                            importantForAutofill="yes"
-                            maxLength={30}
-                            autoCorrect={false}
-                            returnKeyType="next"
-                            theme={{ colors: { primary: "#999" } }}
-                            blurOnSubmit={false}
-                            onSubmitEditing={() => this.lastNameRef.current.focus()}
-                            fieldName="firstName"
-                            fieldsErrors={fieldsErrors}
+                                value={firstName}
+                                onChangeText={firstName => this.handelInputchange(firstName, 'firstName')}
+                                placeholderText="Prénom"
+                                iconType="account"
+                                keyboardType="default"
+                                autoCapitalize="none"
+                                autoCompleteType="name"
+                                textContentType="givenName"
+                                importantForAutofill="yes"
+                                maxLength={30}
+                                autoCorrect={false}
+                                returnKeyType="next"
+                                theme={{ colors: { primary: "#999" } }}
+                                blurOnSubmit={false}
+                                onSubmitEditing={() => this.lastNameRef.current.focus()}
+                                fieldName="firstName"
+                                fieldsErrors={fieldsErrors}
                             />
 
                             <FormInput
@@ -483,7 +486,7 @@ export class Register extends Component {
                             <Button 
                                 style='text' 
                                 onPress={() => {this.props.navigation.navigate('Login')}}
-                                color='#32CD32'
+                                color='#4267b2'
                             > 
                                 Connexion
                             </Button>
@@ -494,10 +497,6 @@ export class Register extends Component {
                             <Text style={styles.dividerText}>OU</Text>
                             <View style={styles.divider} />
                         </View>
-
-                        <FacebookButton 
-                            onPress={() => {}}
-                        />
 
                         <GoogleButton 
                             onPress={() => {}} 
@@ -566,12 +565,3 @@ const styles = StyleSheet.create({
     }
 })
 
-/*
-                        <FormInput
-                            placeholderText="Numéro de téléphone"
-                            iconType="phone"
-                            keyboardTypeType="number-pad"
-                            autoCorrect={false}
-                            onChangeText={(num)=> this.setState({ num })}
-                        />
-*/

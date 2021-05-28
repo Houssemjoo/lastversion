@@ -9,7 +9,7 @@ export default function UserImage({ sourceUrl }) {
                 source = {{
                     uri: sourceUrl,
                 }}
-                style={{backgroundColor: "#00000000"}}
+                style={{backgroundColor: "#00000000", alignSelf: "center"}}
                 size={80}
             />
         )
@@ -19,7 +19,7 @@ export default function UserImage({ sourceUrl }) {
         <Avatar.Image
             source = {UserImg}
             size={80}
-            style={{backgroundColor: "#00000000"}}
+            style={{backgroundColor: "#00000000", alignSelf: "center"}}
         />
     )
 }

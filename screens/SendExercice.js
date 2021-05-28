@@ -4,13 +4,14 @@ import 'firebase/firestore'
 import 'firebase/auth'
 import { connect } from 'react-redux'
 import { View, FlatList, StyleSheet } from 'react-native'
-import { Button, TextInput  }  from 'react-native-paper'
+import { Button, TextInput, ProgressBar, Text }  from 'react-native-paper'
 import { FetchUsers }  from '../redux/actions'
 import ExerciceImage from '../components/ExerciceImage/ExerciceImage'
 import * as ImagePicker from 'expo-image-picker'
-
+import * as ImageManipulator from 'expo-image-manipulator'
 import UsersList from '../components/SearchUsers/UsersList/UsersList'
 import SearchBar from '../components/SearchUsers/SearchBar/SearchBar'
+import { sendPushNotification } from '../utility/PushNotification'
 
 const InputField = ({ handleTextChange, state, handlePress }) => {
 
@@ -48,10 +49,9 @@ const InputField = ({ handleTextChange, state, handlePress }) => {
     )
 }
 
-
-const SendButton = ({ handleOnPress }) => {
+const SendButton = ({ handleOnPress, disabled }) => {
     return(
-        <Button color="#FFA500" labelStyle={{ fontSize: 18, color: "#FFF" }} style={{ margin: 10, marginBottom: 20 }} mode="contained" onPress={handleOnPress}>
+        <Button disabled={disabled} color="#ee6425" labelStyle={{ fontSize: 18, color: "#FFF" }} style={{ margin: 10, marginBottom: 20 }} mode="contained" onPress={handleOnPress}>
             Envoyer
         </Button>
     )
@@ -67,6 +67,7 @@ class SendExercice extends Component {
             selectedUsers: [],
             exerciceTitle: '',
             exerciceDiscr: '',
+            uploadValue: null
         }
     }
 
@@ -115,9 +116,17 @@ class SendExercice extends Component {
     }
 
     handleOnPress = async () => {
-        const{ image, selectedUsers, exerciceTitle, exerciceDiscr } = this.state
+        const{ image, selectedUsers, exerciceTitle, exerciceDiscr, users } = this.state
         let validation = true
-   
+        const Tokens = []
+
+        selectedUsers.forEach((su) => {
+            const indexOfuser = users.map((u) => u.userId).indexOf(su)
+            if(users[indexOfuser].expoToken){
+                Tokens.push(users[indexOfuser].expoToken)
+            }
+        })
+
         if(image === null){
             validation = false
         }
@@ -150,10 +159,12 @@ class SendExercice extends Component {
             .then(() =>  {
                 this.setState({ 
                     image: null,
-                    imageTitle: '',
-                    imageDiscr: '',
-                    selectedUsers: []
+                    exerciceTitle: '',
+                    exerciceDiscr: '',
+                    selectedUsers: [],
+                    uploadValue: null
                  })
+                sendPushNotification({ expoPushToken: Tokens, title: `Nouveau Exercice: ${exerciceTitle}`, body: `${exerciceDiscr}` })
                  alert("Exercice bien envoyée ✔️")
             })
             .catch(err => {
@@ -163,17 +174,29 @@ class SendExercice extends Component {
     }
 
     uploadImage = async (uri) => {
-        const imageName = 'profileImage' + Date.now();
+        const imageName = `exercice${Date.now()}.png` 
     
         const response = await fetch(uri);
         const blob = await response.blob();
     
         const ref = firebase.storage().ref().child(`images/${imageName}`)
-    
-        return ref.put(blob).then(() => {
-          return ref.getDownloadURL().then(url => {
-            return url
-          })
+        const uploadTask = ref.put(blob)
+
+        return new Promise((resolve, reject) => {
+            uploadTask.on('state_changed',
+            (snapshot) => {
+                let progress = (snapshot.bytesTransferred / snapshot.totalBytes);
+                this.setState({uploadValue: progress})
+            },
+            (error) => {
+                reject(error)
+            },
+            () => {
+                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                    resolve(downloadURL)
+                })
+            }
+            )
         })
     }
 
@@ -186,28 +209,42 @@ class SendExercice extends Component {
             allowsEditing: true,
             aspect: [4, 4],
             quality: 1,
-            base64: true
           })
   
           if (!result.cancelled) {
-            this.setState({ image: result.uri })
+            let image = await this.compressImage(result)
+
+            this.setState({ image: image.uri, uploadValue: null })
           }
         }
+    }
+
+    compressImage = async (image) => {
+        const manipResult = await ImageManipulator.manipulateAsync(
+          image.localUri || image.uri,
+          [{ resize: { width: 400 } }],
+          { compress: 1, format: ImageManipulator.SaveFormat.PNG, base64: true }
+        )
+       
+        return manipResult
     }
     
     handlePress = () => {
         this.pickImage()
     }
 
-    render(){
-        const{ data, users, image, imageDiscr, imageTitle, selectedUsers } = this.state
+    componentWillUnmount(){
 
+    }
+
+    render(){
+        const{ data, users, image, imageDiscr, imageTitle, selectedUsers, uploadValue } = this.state
         const Data = [
             {
                 name: "InputField",
                 handleTextChange: this.handleTextChange,
                 state: { image, imageDiscr, imageTitle },
-                handlePress: this.handlePress
+                handlePress: this.handlePress,
             },
             {
                 name: "SearchUsers",
@@ -240,16 +277,37 @@ class SendExercice extends Component {
             return null
         }
 
+        const disabled = uploadValue !== null ? true : false
+
         return(
-            <View style={{flex: 1}}>
+            <View style={{ flex: 1 }}>
                 <FlatList 
                     data={Data}
                     renderItem={renderItem}
                     keyExtractor={keyExtractor}
                 />
-                <SendButton handleOnPress={this.handleOnPress} />
-            </View>
+                {
+                    uploadValue !== null ?
+                        <View style={{flex: 1, minHeight: 50}}>
 
+                        {
+                            uploadValue === 1 ?
+                            <Text style={{fontSize: 14, alignSelf: "center", marginTop: 5, marginBottom: 10}}>
+                            Téléchargement d'image avec succès
+                            </Text> 
+                            : 
+                            <Text style={{fontSize: 14, alignSelf: "center", marginBottom: 10}}>
+                            Téléchargement d'image en cours...
+                            </Text> 
+                        }
+
+                        <ProgressBar style={{height: 15, width: "95%", borderRadius: 10, alignSelf: "center", marginBottom: 20}} progress={uploadValue} color='#FFA500' />
+                        </View>
+                    : null
+                }
+
+                    <SendButton handleOnPress={this.handleOnPress} disabled={disabled} />               
+            </View>
         )
     }
 }

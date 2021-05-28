@@ -9,6 +9,7 @@ import { FetchUsers }  from '../redux/actions'
 
 import UsersList from '../components/SearchUsers/UsersList/UsersList'
 import SearchBar from '../components/SearchUsers/SearchBar/SearchBar'
+import { sendPushNotification } from '../utility/PushNotification'
 
 
 const InputField = ({ handleTextChange, state }) => (
@@ -53,7 +54,7 @@ const InputField = ({ handleTextChange, state }) => (
 
 const SendButton = ({ handleOnPress }) => {
     return(
-        <Button color="#FFA500" labelStyle={{ fontSize: 18, color: "#FFF" }} style={{ margin: 10, marginBottom: 20 }} mode="contained" onPress={handleOnPress}>
+        <Button color="#ee6425" labelStyle={{ fontSize: 18, color: "#FFF" }} style={{ margin: 10, marginBottom: 20 }} mode="contained" onPress={handleOnPress}>
             Envoyer
         </Button>
     )
@@ -117,10 +118,18 @@ class videoScreen extends Component{
        }
     }
 
-    handleOnPress = () => {
-        const{ url, selectedUsers, videoTitle, videoDiscr } = this.state
+    handleOnPress = async () => {
+        const{ url, selectedUsers, videoTitle, videoDiscr, users } = this.state
         let validation = true
-        
+        const Tokens = []
+
+        selectedUsers.forEach((su) => {
+            const indexOfuser = users.map((u) => u.userId).indexOf(su)
+            if(users[indexOfuser].expoToken){
+                Tokens.push(users[indexOfuser].expoToken)
+            }
+        })
+
         if(url.trim().length === 0){
             validation = false
         }
@@ -155,6 +164,7 @@ class videoScreen extends Component{
                     videoDiscr: '',
                     selectedUsers: [],
                  })
+                sendPushNotification({ expoPushToken: Tokens, title: `Nouvelle Vidéo: ${videoTitle}`, body: `${videoDiscr}`})
                  alert("Vidéo bien envoyée ✔️")
             })
             .catch(err => {
@@ -203,8 +213,6 @@ class videoScreen extends Component{
             return null
         }
         
-   
-
         return(
             <View style={{flex :1}}>
                 <FlatList 

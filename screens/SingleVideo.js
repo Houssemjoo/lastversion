@@ -189,11 +189,11 @@ class SingleVideoScreen extends Component {
                   <Text style={{ fontSize: 20, textTransform: "capitalize", fontWeight: "500", marginBottom: 5 }}>{title}</Text>
                   <Text style={{ fontSize: 16, textTransform: "capitalize", color: "#777" }}>{description}</Text>
                 </View>
-                <Button onPress={() => { this.props.navigation.navigate('Preview', { videoId })} } color="#FFA500"  mode="contained" labelStyle={{ fontSize: 18, color: "#FFF"  }} style={{ marginTop: 10, marginBottom: 50, marginHorizontal: 10 }} > remplir mon bilan </Button>
+                <Button onPress={() => { this.props.navigation.navigate('Preview', { videoId })} } color="#ee6425"  mode="contained" labelStyle={{ fontSize: 18, color: "#FFF"  }} style={{ marginTop: 10, marginBottom: 50, marginHorizontal: 10 }} > remplir mon bilan </Button>
             </View>
 
               <View style={styles.container}>
-                <Icon name="stopwatch" color='#FFA500' size={45}/>
+                <Icon name="stopwatch" color='#ee6425' size={45}/>
                 <Timer
                   interval={laps.reduce((total, curr) => total + curr, 0) + timer}
                   style={styles.timer}

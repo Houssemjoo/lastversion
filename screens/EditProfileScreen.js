@@ -6,8 +6,9 @@ import {
   StyleSheet,
   SafeAreaView, 
   ScrollView,
+  StatusBar
 } from 'react-native';
-import { Button, TextInput } from 'react-native-paper'
+import { Button, TextInput, withTheme, ProgressBar } from 'react-native-paper'
 
 import firebase from 'firebase/app'
 import 'firebase/auth'
@@ -15,8 +16,7 @@ import 'firebase/firestore'
 import 'firebase/storage'
 
 import * as ImagePicker from 'expo-image-picker'
-
-import { withTheme } from 'react-native-paper'
+import * as ImageManipulator from 'expo-image-manipulator'
 
 import EditProfileUserImg from '../components/EditProfileUserImg/EditProfileUserImg'
 
@@ -31,7 +31,8 @@ export class EditProfileScreen extends PureComponent {
       address: '',
       num: '',
       sourceImg: '',
-      image: null
+      image: null,
+      uploadValue: null
     }
 
     componentDidMount(){
@@ -52,10 +53,6 @@ export class EditProfileScreen extends PureComponent {
       const{ sourceImg, firstName, lastName, address, num, email, image } = this.state
       const { role, userId } = this.props.userState.currentUser
       let imgUrl = sourceImg
-
-      if(image && image !== null && image.length > 0){
-        imgUrl = await this.uploadImage(image)
-      }
       
       if(!firstName && firstName.length === 0){
         errorForm = true
@@ -78,6 +75,10 @@ export class EditProfileScreen extends PureComponent {
       }
 
       if(!errorForm){
+        if(image && image !== null && image.length > 0){
+          imgUrl = await this.uploadImage(image)
+        }
+
         firebase.firestore().collection("users")
           .doc(firebase.auth().currentUser.uid)
           .update({
@@ -105,17 +106,30 @@ export class EditProfileScreen extends PureComponent {
     }
 
   uploadImage = async (uri) => {
-    const imageName = 'profileImage' + Date.now();
+    const imageName = `profileImage${Date.now()}.png` 
 
-    const response = await fetch(uri);
-    const blob = await response.blob();
+    const response = await fetch(uri)
+    const blob = await response.blob()
 
     const ref = firebase.storage().ref().child(`images/${imageName}`)
+    const uploadTask = ref.put(blob)
+    this.unsubscribe = ref
 
-    return ref.put(blob).then(() => {
-      return ref.getDownloadURL().then(url => {
-        return url
-      })
+    return new Promise((resolve, reject) => {
+        uploadTask.on('state_changed',
+          (snapshot) => {
+            let progress = (snapshot.bytesTransferred / snapshot.totalBytes);
+            this.setState({uploadValue: progress})
+          },
+          (error) => {
+            reject(error)
+          },
+          () => {
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+              resolve(downloadURL)
+            })
+          }
+        )
     })
   }
 
@@ -126,25 +140,43 @@ export class EditProfileScreen extends PureComponent {
         let result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.All,
           allowsEditing: true,
-          aspect: [4, 3],
+          aspect: [4, 4],
           quality: 1,
-          base64: true
         })
 
         if (!result.cancelled) {
-          this.setState({ image: result.uri })
+          let image = await this.compressImage(result)
+
+          this.setState({ image: image.uri, uploadValue: null })
         }
       }
   }
 
-    render(){
-      const { colors } = this.props.theme
-      const { firstName, lastName, email, address, num, sourceImg, image } = this.state
+  compressImage = async (image) => {
+    const manipResult = await ImageManipulator.manipulateAsync(
+      image.localUri || image.uri,
+      [{ resize: { width: 400 } }],
+      { compress: 1, format: ImageManipulator.SaveFormat.PNG, base64: true }
+    )
+   
+    return manipResult
+  }
 
-      return(
+  componentWillUnmount(){
+    if(this.unsubscribe){
+      this.unsubscribe()
+    }
+  }
+
+  render(){
+    const { colors } = this.props.theme
+    const { firstName, lastName, email, address, num, sourceImg, image, uploadValue } = this.state
+
+    return(
         <SafeAreaView style={styles.container}>
-            <ScrollView>
-              <View style={{ alignItems: 'center', marginTop : 50 , marginBottom: 30 }}>
+            <StatusBar barStyle={"dark-content"} backgroundColor="#FFF" />
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={{ alignItems: 'center', marginTop: 30 , marginBottom: 10 }}>
                 <TouchableOpacity onPress={this.pickImage}>
                   <View
                     style={{
@@ -159,9 +191,30 @@ export class EditProfileScreen extends PureComponent {
                 </TouchableOpacity>
               <Text style={{ marginTop: 25, fontSize: 16, fontWeight: 'bold' }}>{lastName} {firstName}</Text>
             </View>
+            
+            {
+              uploadValue !== null ?
+                <View style={{flex: 1, marginBottom: 15}}>
+
+                  {
+                    uploadValue === 1 ?
+                    <Text style={{fontSize: 14, alignSelf: "center", marginBottom: 10}}>
+                      Téléchargement d'image avec succès
+                    </Text> 
+                    : 
+                    <Text style={{fontSize: 14, alignSelf: "center", marginBottom: 10}}>
+                      Téléchargement d'image en cours...
+                    </Text> 
+                  }
+
+                  <ProgressBar style={{flex: 1, width:'90%', height: 15, borderRadius: 10, alignSelf: "center"}} progress={uploadValue} color='#FFA500' />
+                </View>
+              : null
+            }
 
             <View style={styles.action}>
               <TextInput
+                theme={{ colors: { primary: "#ee6425" } }}
                 placeholder="Prénom"
                 left={<TextInput.Icon icon="account" color={"#555"} />}
                 placeholderTextColor="#666666"
@@ -179,6 +232,7 @@ export class EditProfileScreen extends PureComponent {
 
             <View style={styles.action}>
               <TextInput
+                theme={{ colors: { primary: "#ee6425" } }}
                 placeholder="Nom"
                 left={<TextInput.Icon icon="account" color={"#555"} />}
                 value={lastName}
@@ -196,6 +250,7 @@ export class EditProfileScreen extends PureComponent {
 
             <View style={styles.action}>
               <TextInput
+                theme={{ colors: { primary: "#ee6425" } }}
                 placeholder="Téléphone"
                 value={num}
                 left={<TextInput.Icon icon="phone" color={"#555"} />}
@@ -214,6 +269,7 @@ export class EditProfileScreen extends PureComponent {
 
             <View style={styles.action}>
               <TextInput
+                theme={{ colors: { primary: "#ee6425" } }}
                 placeholder="Email"
                 left={<TextInput.Icon icon="email" color={"#555"} />}
                 value={email}
@@ -232,6 +288,7 @@ export class EditProfileScreen extends PureComponent {
 
             <View style={styles.action}>
               <TextInput
+                theme={{ colors: { primary: "#ee6425" } }}
                 placeholder="Adresse"
                 left={<TextInput.Icon icon="map-marker" color={"#555"} />}
                 placeholderTextColor="#666666"
@@ -247,7 +304,7 @@ export class EditProfileScreen extends PureComponent {
               />
             </View>
 
-            <Button labelStyle={{color: "#FFF", fontSize: 18}} style={{ marginTop: 10 }} mode='contained' color='#FFA500' styleContent={styles.commandButton} onPress={this.handleEditProfile}>
+            <Button labelStyle={{color: "#FFF", fontSize: 18}} style={{ marginTop: 10, marginBottom: 30 }} mode='contained' color='#ee6425' styleContent={styles.commandButton} onPress={this.handleEditProfile}>
               Modifier
             </Button>
           </ScrollView>
@@ -260,12 +317,12 @@ const mapStateToProps = (state) => ({
   userState: state.userState,
 })
 
-export default connect(mapStateToProps, { UpdateUser })(withTheme(EditProfileScreen));
+export default connect(mapStateToProps, { UpdateUser })(withTheme(EditProfileScreen))
 
 const styles = StyleSheet.create({
     container : {
       flex: 1,
-      padding:20
+      paddingHorizontal:20
     },
     commandButton: {
       alignItems: 'center',
@@ -338,4 +395,4 @@ const styles = StyleSheet.create({
       paddingLeft: 10,
       color: '#05375a',
     },
-  });
+  })

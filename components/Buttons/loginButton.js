@@ -5,7 +5,7 @@ import { Button } from 'react-native-paper'
 export default function LoginButton({text, onPress}) {
     return (
         <View style={{marginTop: 50}}>
-            <Button mode="contained" color="#e67300" labelStyle={styles.buttonText} onPress={onPress} contentStyle={styles.button}>
+            <Button mode="contained" labelStyle={styles.buttonText} onPress={onPress} contentStyle={styles.button}>
                 {text}
             </Button>
         </View>
@@ -17,7 +17,8 @@ const styles = StyleSheet.create({
         width : 250,
         textAlign: 'center',
         fontSize: 16,
-        padding: 5
+        padding: 5,
+        backgroundColor: "#ee6425"
     },
     buttonText : {
        color : 'white',

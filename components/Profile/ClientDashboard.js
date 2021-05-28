@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { createStackNavigator } from '@react-navigation/stack'
+import { createStackNavigator, HeaderTitle } from '@react-navigation/stack'
 
 import ClientAccountScreen from '../../screens/ClientAccount'
 
@@ -9,7 +9,7 @@ export class ClientDashboard extends PureComponent {
     render() {
         return (
             <Stack.Navigator initialRouteName="Compte">
-                <Stack.Screen name="Compte" component={ClientAccountScreen} options={{ headerShown: true }} />
+                <Stack.Screen name="Compte" component={ClientAccountScreen} options={{ headerShown: false, headerTitle: "", headerStyle: { backgroundColor: '#4ba0f4'}, headerTintColor: '#fff' } } />
             </Stack.Navigator>
         )
     }

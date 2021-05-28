@@ -28,10 +28,11 @@ export class Login extends Component {
                   }
               ]
             }
+            this.mounted = false
     }
     
     componentDidMount(){
-      
+      this.mounted = true
     }
 
     onSignIn = () => {
@@ -52,10 +53,12 @@ export class Login extends Component {
               fieldsErrors[errorIndex].message = [...messages, errorMessage]
           }
 
-          this.setState({
-              ...this.state,
-              fieldsErrors: fieldsErrors
-          })
+          if(this.mounted){
+            this.setState({
+                ...this.state,
+                fieldsErrors: fieldsErrors
+            })
+          }
         }
 
         if(password.trim().length === 0){
@@ -72,10 +75,12 @@ export class Login extends Component {
               fieldsErrors[errorIndex].message = [...messages, errorMessage]
           }
 
-          this.setState({
+          if(this.mounted){
+            this.setState({
               ...this.state,
               fieldsErrors: fieldsErrors
-          })
+            })
+          }
         }
 
         if(validation){
@@ -84,10 +89,12 @@ export class Login extends Component {
             //
           })
           .catch((error)=> {
+            if(this.mounted){
               this.setState({
                 visible: true,
                 firebaseError: error.message
               })
+            }
           })
         }
     }
@@ -97,11 +104,19 @@ export class Login extends Component {
 
       this.state.fieldsErrors[errorIndex].message = []
 
-      this.setState({ ...this.state, fieldsErrors: this.state.fieldsErrors, [field]: val })
+      if(this.mounted){
+        this.setState({ ...this.state, fieldsErrors: this.state.fieldsErrors, [field]: val })
+      }
     }
 
     onDismissSnackBar = () => {
-      this.setState({ visible: false, firebaseError: null })
+      if(this.mounted){
+        this.setState({ visible: false, firebaseError: null })
+      }
+    }
+
+    componentWillUnmount(){
+      this.mounted = false
     }
 
     render() {
@@ -146,13 +161,15 @@ export class Login extends Component {
                 </View>
 
                 <View style={styles.registerField}>
-                    <Text style={styles.registerLabel}>Nouveau sur Kine ?</Text>
-                    <Button 
+                    <Text style={styles.registerLabel}>Nouveau sur Healthy Therapy ?</Text>
+                    <Button
+                      style={{alignSelf: "center"}}
+                      labelStyle={{ fontSize: 12 }}
                       style='text' 
                       onPress={() => {this.props.navigation.navigate('Register')}}
-                      color='#32CD32'
+                      color='#4267b2'
                     > 
-                        Créer un compte 
+                    Créer un compte 
                     </Button>
                 </View>
 
@@ -161,10 +178,6 @@ export class Login extends Component {
                   <Text style={styles.dividerText}>OU</Text>
                   <View style={styles.divider} />
                 </View>
-
-                <FacebookButton 
-                    onPress={() => {}}
-                />
 
                 <GoogleButton 
                     onPress={() => {}} 
@@ -237,8 +250,8 @@ const styles = StyleSheet.create({
     },
     registerLabel:{
         color: "#888",
-        fontSize: 16,
-        marginRight: 5
+        fontSize: 14,
+        flexShrink: 1
     },
     dividerContainer:{
       flexDirection: "row",
@@ -254,4 +267,4 @@ const styles = StyleSheet.create({
         backgroundColor: "#888",
         width: "100%"
     }
-});
+})

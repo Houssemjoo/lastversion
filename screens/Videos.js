@@ -4,7 +4,7 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import { connect } from 'react-redux'
 
-import { FlatList, Text, View, Pressable } from 'react-native'
+import { FlatList, Text, View, Pressable, StatusBar } from 'react-native'
 import { Avatar, List } from 'react-native-paper'
 
 const Header = ({ videosTotal }) => {
@@ -43,7 +43,7 @@ const Video = ({ videoId, title, description, url, navigation }) => {
             title={title}
             description={description}
             descriptionStyle={{ fontSize: 16 }}
-            left={props => <Avatar.Icon {...props} icon='video' size={45} color="#FFA500" style={{backgroundColor: "#F1F1F1", marginTop: 10, marginRight: 10 }}/>}
+            left={props => <Avatar.Icon {...props} icon='video' size={45} color="#ee6425" style={{backgroundColor: "#F1F1F1", marginTop: 10, marginRight: 10 }}/>}
         />
     </Pressable>
   )
@@ -123,11 +123,14 @@ export class Videos extends Component {
     }
     
     return (
-      <FlatList 
-        data={Data}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-      />
+      <View style={{ flex: 1 }}>
+        <StatusBar animated={true} barStyle={"dark-content"} backgroundColor="#FFF" />
+        <FlatList 
+          data={Data}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+        />
+      </View>
     )
   }
 }

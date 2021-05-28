@@ -1,10 +1,13 @@
-import { StatusBar } from 'expo-status-bar';
-import React, { useState, useEffect } from 'react';
-import { View, LogBox, ActivityIndicator } from 'react-native';
+import { StatusBar } from 'expo-status-bar'
+import React, { useState, useEffect } from 'react'
+import { View, LogBox, ActivityIndicator } from 'react-native'
 import firebase from 'firebase/app'
 import 'firebase/auth'
+import * as Notifications from 'expo-notifications'
+import Constants from 'expo-constants'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
-// LogBox.ignoreLogs(['Setting a timer'])
+LogBox.ignoreLogs(['Setting a timer'])
 
 const firebaseConfig = {
   apiKey: "AIzaSyB65HnG2F1CtTwPRAGNlCn8ukbMfMeTTWY",
@@ -39,27 +42,55 @@ import ExercicesScreen from './screens/Exercices'
 import SingleRapportScreen from './screens/SingleRapport'
 import SendExercicesScreen from './screens/SendExercices'
 
+//NOTIFICATION INITIALIZE
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  })
+})
+
 const Stack = createStackNavigator()
 const Stacklog = createStackNavigator()
 
 export default function App() {
   const [initializing, setInitializing] = useState(true);
   const [userState, setUser] = useState();
+  const [expoPushToken, setExpoPushToken] = useState('')
 
   function onAuthStateChanged(user) {
     if(user){
-      setUser(user);
+      setUser(user)
     } else {
       setUser(null)
     }
 
-    if (initializing) setInitializing(false);
+    if (initializing) setInitializing(false)
   }
 
   useEffect(() => {
     const subscriber = firebase.auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber; // unsubscribe on unmount
+
+    registerForPushNotificationsAsync().then(token => setExpoPushToken(token))
+
+    const Notifsubscription = Notifications.addNotificationReceivedListener(notification => {
+      // console.log(notification)
+    })
+
+    const subscription = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
+
+    return () => {
+      setInitializing(false)
+      subscriber      
+      Notifsubscription.remove()
+      subscription.remove()
+    }
   }, [])
+
+  const handleNotificationResponse = (res) => {
+    // console.log(res)
+  }
 
   if(initializing){
     return(
@@ -72,6 +103,7 @@ export default function App() {
   return (
       <Provider store={store}>
         <StatusBar />
+        
         <NavigationContainer>
         {
           !userState ?
@@ -81,25 +113,59 @@ export default function App() {
                   <Stack.Screen name="Login" component={LoginScreen}  options = {{title : 'Se Connecter'}}  />
               </Stack.Navigator>
             :
-              null
+          null
         }
+
         {
             userState ?
               <Stacklog.Navigator initialRouteName="Profile">
                 <Stacklog.Screen name="Profile" component={Profile} options={{ headerShown: false }} />
-                <Stacklog.Screen name="EditProfile" component={EditProfile} options={{ headerShown: true , title : 'Modifier Votre Profil'}}/>
+                <Stacklog.Screen name="EditProfile" component={EditProfile} options={{ headerShown: true , title : 'Modifier Votre Profil'}} />
                 <Stacklog.Screen name="Videos" component={VideosScreen} options={{ headerShown: true , title : 'Mes Vidéos'}} />
                 <Stacklog.Screen name="Single Video" component={SingleVideoScreen} options={{ headerShown: false, title : 'vidéo' }} />
-                <Stacklog.Screen name="Preview" component={PreviewScreen} options={{ headerShown: true , title : 'Envoyer Mon Rapport'}}/>
-                <Stacklog.Screen name="Single User" component={SingleUserScreen} options={{ headerShown: false }}/>
+                <Stacklog.Screen name="Preview" component={PreviewScreen} options={{ headerShown: true , title : 'Envoyer Mon Rapport'}} />
+                <Stacklog.Screen name="Single User" component={SingleUserScreen} options={{ headerShown: false }} />
                 <Stacklog.Screen name="Exercices" component={ExercicesScreen} options={{ headerShown: true }}/>
-                <Stacklog.Screen name="SingleRapport" component={SingleRapportScreen} options={{ headerShown: false }}/>
-                <Stacklog.Screen name="SendExercices" component={SendExercicesScreen} options={{ headerShown: false }}/>
+                <Stacklog.Screen name="SingleRapport" component={SingleRapportScreen} options={{ headerShown: false }} />
+                <Stacklog.Screen name="SendExercices" component={SendExercicesScreen} options={{ headerShown: false }} />
               </Stacklog.Navigator>
               :
-              null
+            null
         }
         </NavigationContainer>
       </Provider>
   );
+}
+
+async function registerForPushNotificationsAsync() {
+  let token
+  if (Constants.isDevice) {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync()
+    let finalStatus = existingStatus
+
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync()
+      finalStatus = status
+    }
+
+    if (finalStatus !== 'granted') {
+      return;
+    }
+
+    token = (await Notifications.getExpoPushTokenAsync()).data
+    console.log("token     :", token)
+  }
+
+  await AsyncStorage.setItem('expoPushToken', token)
+
+  if (Platform.OS === 'android') {
+    Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF231F7C',
+    })
+  }
+
+  return token
 }

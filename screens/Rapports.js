@@ -37,7 +37,7 @@ const RapportItem = (prop) => {
                 titleStyle={{ marginTop: 0 }}
                 title={`${prop.videoData.title}`}
                 description={`${prop.userData.firstName} ${prop.userData.lastName}`}
-                left={props => <Avatar.Icon color="#FFA500" icon="clipboard-account" style={{backgroundColor: "#00000000", marginTop: 10, marginRight: 10 }} size={60}  />}
+                left={props => <Avatar.Icon color="#ee6425" icon="clipboard-account" style={{backgroundColor: "#00000000", marginTop: 10, marginRight: 10 }} size={60}  />}
             />
         </Pressable>
     )

@@ -1,3 +1,5 @@
 export const USER_STATE_CHANGE = 'USER_STATE_CHANGE'
 export const USERS_STATE = 'USERS_STATE'
 export const REMOVE_USER = 'REMOVE_USER'
+export const TOGGLE_LOAD = 'TOGGLE_LOAD'
+export const USER_ERRORS = 'USER_ERRORS'

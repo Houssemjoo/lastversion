@@ -49,7 +49,7 @@ const Video = ({ videoData }) => {
             </View>
             <View style={{flex: 1, marginHorizontal: 15, marginVertical: 8, flexDirection: "row", alignItems: "center"}}>
                 <Text style={{color: "#333", marginLeft: 5}}>Vidéo url : </Text>
-                <Button onPress={() => handleOpenLink(videoData.url)} color="#FFA500" labelStyle={{fontSize: 12}} mode="text" style={{ marginLeft: 5 }}>Ouvrir</Button>
+                <Button onPress={() => handleOpenLink(videoData.url)} color="#ee6425" labelStyle={{fontSize: 12}} mode="text" style={{ marginLeft: 5 }}>Ouvrir</Button>
             </View>
         </View>
     )

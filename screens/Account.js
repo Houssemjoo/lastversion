@@ -12,10 +12,24 @@ import UserImage from '../components/UserImage/UserImage'
 import { connect } from 'react-redux'
 
 export class Account extends PureComponent {
+    constructor(props) {
+        super(props);
+        this.mounted = false
+    }
     
+    componentDidMount(){
+        this.mounted = true
+    }
+
     logout = () => {
-        firebase.auth()
-        .signOut()
+        if(this.mounted){
+            firebase.auth()
+            .signOut()
+        }
+    }
+
+    componentWillUnmount(){
+        this.mounted = false
     }
 
     render() {
@@ -58,21 +72,21 @@ export class Account extends PureComponent {
                     <View tyle={styles.menuWrapper}>
                         <TouchableRipple onPress={() => { this.props.navigation.navigate('SendExercices') }}>
                             <View style={styles.menuItem}>
-                                <Icon name="share-outline" color="#FFA500" size={25}/>
+                                <Icon name="share-outline" color="#ee6425" size={25}/>
                                 <Text style={styles.menuItemText}>Envoyer des exercices</Text>
                             </View>
                         </TouchableRipple>
 
                         <TouchableRipple  onPress={() => {this.props.navigation.navigate("EditProfile")}}>
                             <View style={styles.menuItem}>
-                                <Icon name="file-document-edit-outline" color="#FFA500" size={25}/>
+                                <Icon name="file-document-edit-outline" color="#ee6425" size={25}/>
                                 <Text style={styles.menuItemText}>Modifier</Text>
                             </View>
                         </TouchableRipple>
 
                         <TouchableRipple  onPress={() => this.logout()}>
                             <View style={styles.menuItem}>
-                                <Icon name="logout-variant" color="#FFA500" size={25}/>
+                                <Icon name="logout-variant" color="#ee6425" size={25}/>
                                 <Text style={styles.menuItemText}>Se Déconnecter </Text>
                             </View>
                         </TouchableRipple>

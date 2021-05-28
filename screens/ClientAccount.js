@@ -1,11 +1,14 @@
 import React, { PureComponent } from 'react'
-import { Text, View, SafeAreaView, ScrollView, StyleSheet } from 'react-native'
+import { Text, View, SafeAreaView, ScrollView, StyleSheet, StatusBar } from 'react-native'
 import {
     Title,
     Caption,
     TouchableRipple,
+    Button
 } from 'react-native-paper'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+
+import * as Linking from 'expo-linking';
 
 import firebase from 'firebase/app'
 import 'firebase/auth'
@@ -15,18 +18,28 @@ import UserImage from '../components/UserImage/UserImage'
 
 import { connect } from 'react-redux'
 
+const marginTop = StatusBar.currentHeight + 20
+
 export class ClientDashboard extends PureComponent {
-    state = {
-        videosTotal: 0,
-        exercicesTotal: 0
+    constructor(props) {
+        super(props);
+        this.state = {
+            videosTotal: 0,
+            exercicesTotal: 0
+        }
+        this.mounted = false
     }
 
     logout = () => {
-        firebase.auth()
-        .signOut()
+        if(this.mounted){
+            firebase.auth()
+            .signOut()
+        }
     }
     
     async componentDidMount(){
+        this.mounted = true
+
         const{ userId } = this.props.userState.currentUser
 
        const videosTotal = await this.FetchVideosCount({ userId })
@@ -34,7 +47,9 @@ export class ClientDashboard extends PureComponent {
        const exercicesTotal = await this.FetchExercices({ userId })
 
        if(videosTotal){
-            this.setState({ videosTotal, exercicesTotal })
+           if(this.mounted){
+                this.setState({ videosTotal, exercicesTotal })
+           }
        }
     }
 
@@ -61,6 +76,10 @@ export class ClientDashboard extends PureComponent {
             return null
         }
     }
+
+    componentWillUnmount(){
+        this.mounted = false
+    }
       
     render() {
         const { address = "", email = "", firstName = "", lastName = "", num = "", role = "", sourceImg = "" } = this.props.userState.currentUser
@@ -68,17 +87,18 @@ export class ClientDashboard extends PureComponent {
 
         return (
             <SafeAreaView style = {styles.container}>
+                <StatusBar backgroundColor="#FFF" />
+
                 <ScrollView>
-                    <View style = {{flex: 1, paddingHorizontal: 20, marginBottom: 20 }}>
-                        <View style={{ flexDirection: 'row', marginTop: 15 }} >
+                    <View style = {{flex: 1, paddingHorizontal: 20, backgroundColor: "#13578c", justifyContent: "center", alignItems: "center" }}>
+                        <View style={{ marginTop: marginTop }} >
                           
                             <UserImage sourceUrl={sourceImg} />
 
-                            <View style={{ flex: 1, marginHorizontal: 15, justifyContent: "flex-start", alignItems: "flex-start" }}>
+                            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                                 <Title style={[styles.title, {
                                     marginTop:15,
-                                    marginBottom: 5,
-                                    marginLeft: 10,
+                                    marginBottom: 60,
                                     flexShrink: 1,
                                     }]}
                                 >
@@ -90,16 +110,16 @@ export class ClientDashboard extends PureComponent {
 
                     <View style={styles.userInfoSection}>
                         <View style={styles.row}>
-                            <Icon name="map-marker-radius" color="#777777" size={20}/>
-                            <Text style={{color:"#777777", marginLeft: 20}}> { address } </Text>
+                            <Icon name="map-marker-radius" color="#FFF" size={20}/>
+                            <Text style={{color:"#FFF", marginLeft: 20}}> { address } </Text>
                         </View>
                         <View style={styles.row}>
-                            <Icon name="phone" color="#777777" size={20}/>
-                            <Text style={{color:"#777777", marginLeft: 20}}> { num } </Text>
+                            <Icon name="phone" color="#FFF" size={20}/>
+                            <Text style={{color:"#FFF", marginLeft: 20}}> { num } </Text>
                         </View>
                         <View style={styles.row}>
-                            <Icon name="email" color="#777777" size={20}/>
-                            <Text style={{color:"#777777", marginLeft: 20}}> { email } </Text>
+                            <Icon name="email" color="#FFF" size={20}/>
+                            <Text style={{color:"#FFF", marginLeft: 20}}> { email } </Text>
                         </View>
                     </View>
 
@@ -109,43 +129,49 @@ export class ClientDashboard extends PureComponent {
                             borderRightColor: '#dddddd',
                             borderRightWidth: 1
                         }]}>
-                            <Title>{ videosTotal }</Title>
-                            <Caption>Vidéos</Caption>
+                            <Title style={{color: "#FFF"}}>{ videosTotal }</Title>
+                            <Caption style={{color: "#FFF"}}>Vidéos</Caption>
                         </View>
                         <View style={styles.infoBox}>
-                            <Title>{ exercicesTotal }</Title>
-                            <Caption>Exercices</Caption>
+                            <Title style={{color: "#FFF"}}>{ exercicesTotal }</Title>
+                            <Caption style={{color: "#FFF"}}>Exercices</Caption>
                         </View>
                     </View>
 
-                    <View tyle={styles.menuWrapper}>
+                    <View style={styles.menuWrapper}>
+
+                        <TouchableRipple  onPress={() => {this.props.navigation.navigate("EditProfile")}}>
+                            <View style={styles.menuItem}>
+                                <Icon name="file-document-edit-outline" color="#ee6425" size={25}/>
+                                <Text style={styles.menuItemText}>Profile</Text>
+                            </View>
+                        </TouchableRipple>
+                        
+                        <TouchableRipple onPress={() => {this.props.navigation.navigate('Exercices')}}>
+                            <View style={styles.menuItem}>
+                                <Icon name="run-fast" color="#ee6425" size={25}/>
+                                <Text style={styles.menuItemText}>Mes Exercices</Text>
+                            </View>
+                        </TouchableRipple>
+
+                        <TouchableRipple onPress={() => {Linking.openURL('mailto:healthytherapyMS@gmail.com')}}>
+                            <View style={styles.menuItem}>
+                                <Icon name="gmail" color="#ee6425" size={25}/>
+                                <Text style={styles.menuItemText}>Contact Me</Text>
+                            </View>
+                        </TouchableRipple>
+
                         <TouchableRipple onPress={() => {this.props.navigation.navigate("Videos")}}>
                             <View style={styles.menuItem}>
-                                <Icon name="message-video" color="#FFA500" size={25}/>
+                                <Icon name="message-video" color="#ee6425" size={25}/>
                                 <Text style={styles.menuItemText}>Mes Vidéos</Text>
                             </View>
                         </TouchableRipple>
 
-                        <TouchableRipple onPress={() => {this.props.navigation.navigate('Exercices')}}>
-                            <View style={styles.menuItem}>
-                                <Icon name="run-fast" color="#FFA500" size={25}/>
-                                <Text style={styles.menuItemText}>Mes Exercices</Text>
-                            </View>
-                        </TouchableRipple>
-                        
-                        
-                        <TouchableRipple  onPress={() => {this.props.navigation.navigate("EditProfile")}}>
-                            <View style={styles.menuItem}>
-                                <Icon name="file-document-edit-outline" color="#FFA500" size={25}/>
-                                <Text style={styles.menuItemText}>Modifier</Text>
-                            </View>
-                        </TouchableRipple>
-                        <TouchableRipple  onPress={() => this.logout()}>
-                            <View style={styles.menuItem}>
-                                <Icon name="logout-variant" color="#FFA500" size={25}/>
-                                <Text style={styles.menuItemText}>Se Déconnecter </Text>
-                            </View>
-                        </TouchableRipple>
+                        <Button icon="logout-variant" onPress={() => this.logout()} mode="contained" color="#F00" style={{ width: "60%", alignSelf: "center", marginVertical: 25 }}>
+                            Déconnexion
+                        </Button>
+
                     </View>
                 </ScrollView>
             </SafeAreaView>
@@ -162,14 +188,19 @@ export default connect(mapStateToProps)(ClientDashboard)
 const styles = StyleSheet.create({
         container: {
             flex: 1,
+            backgroundColor: "#13578c",
         },
       userInfoSection: {
         paddingHorizontal: 30,
-        marginBottom: 5,
-        marginTop: 10
+        paddingTop: 30,
+        marginTop: -30,
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+        backgroundColor: "#0575ad"
       },
       title: {
         fontSize: 22,
+        color: "#FFF"
       },
       caption: {
         fontSize: 14,
@@ -187,7 +218,8 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         flexDirection: 'row',
         height: 80,
-        marginVertical: 15
+        paddingVertical: 15,
+        backgroundColor: "#0575ad",
       },
       infoBox: {
         width: '50%',
@@ -195,8 +227,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
       },
       menuWrapper: {
-        marginTop: 10,
-        marginBottom: 30
+        flex: 1,
+        paddingTop: 10,
+        paddingBottom: 10,
+        backgroundColor: "#0575ad",
+        borderBottomLeftRadius: 25,
+        borderBottomRightRadius: 25
       },
       menuItem: {
         flexDirection: 'row',
@@ -204,7 +240,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 30,
       },
       menuItemText: {
-        color: '#777777',
+        color: '#FFF',
         marginLeft: 20,
         fontWeight: '600',
         fontSize: 16,
