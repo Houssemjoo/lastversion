@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "631795409662",
+    "project_id": "kine-dev",
+    "storage_bucket": "kine-dev.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:631795409662:android:5ae65a26ed6d2c5ce6fbaf",
+        "android_client_info": {
+          "package_name": "com.kineapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "631795409662-r9cakoo24h8uouvoichvlai56ld49jqh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrrmHVWOx7WXDpnWw1d6c_YhsIWp-WEgA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "631795409662-r9cakoo24h8uouvoichvlai56ld49jqh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "631795409662-dqka9i7lmdg3bloq31sadvi4al73nj4k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.kineapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

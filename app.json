@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "kine",
+    "name": "Kine",
     "slug": "kine",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,15 +17,17 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.kine.appl"
+      "supportsTablet": true
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
+      "package": "com.kineappli",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.kine.appp"
+      "useNextNotificationsApi": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
