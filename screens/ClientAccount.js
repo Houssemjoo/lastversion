@@ -7,7 +7,7 @@ import {
   StyleSheet,
   StatusBar,
 } from "react-native";
-import { Title, Caption, TouchableRipple, Button } from "react-native-paper";
+import { Title, TouchableRipple, Button } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import * as Linking from "expo-linking";
 import firebase from "firebase/app";
@@ -129,6 +129,7 @@ export class ClientDashboard extends PureComponent {
                       marginTop: 15,
                       marginBottom: 60,
                       flexShrink: 1,
+                      textTransform: "capitalize",
                     },
                   ]}
                 >
@@ -234,14 +235,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#07263e",
   },
-  userInfoSection: {
-    paddingHorizontal: 30,
-    paddingTop: 30,
-    marginTop: -30,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    backgroundColor: "#0e4875",
-  },
   title: {
     fontSize: 22,
     color: "#FFF",
@@ -273,8 +266,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 10,
     paddingBottom: 10,
-    // borderBottomLeftRadius: 25,
-    // borderBottomRightRadius: 25,
   },
   menuItem: {
     flexDirection: "row",

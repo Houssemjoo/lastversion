@@ -17,4 +17,4 @@ export default [
         description: 'Description ',
         image : require ('./images/exercice3.jpg')
     }
-    ]
+]

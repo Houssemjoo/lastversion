@@ -10,9 +10,9 @@ export class AdminDashboard extends PureComponent {
     return (
       <Stack.Navigator>
         <Stack.Screen
-            name="AdminAccount"
-            component={AccountScreen}
-            options={{
+          name="AdminAccount"
+          component={AccountScreen}
+          options={{
             headerShown: false,
             headerTitle: "",
             headerStyle: { backgroundColor: "#4ba0f4" },
